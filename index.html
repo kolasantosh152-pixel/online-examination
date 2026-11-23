@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRI ExamVerse | Academic & NIAT Learning Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            950: '#050814',
+                            900: '#090e24',
+                            850: '#0f1636',
+                            800: '#16204a',
+                            700: '#212f66',
+                        },
+                        brand: {
+                            purple: '#8b5cf6',
+                            blue: '#3b82f6',
+                            indigo: '#6366f1',
+                            cyan: '#06b6d4'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.25s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar & Glassmorphism Utilities */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(9, 14, 36, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(22, 32, 74, 0.55) 0%, rgba(15, 22, 54, 0.75) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+        }
+        .glass-header {
+            background: rgba(9, 14, 36, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .glass-sidebar {
+            background: linear-gradient(180deg, rgba(9, 14, 36, 0.96) 0%, rgba(5, 8, 20, 0.98) 100%);
+            border-right: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+            transition: all 0.2s ease;
+        }
+        .gradient-btn:hover {
+            background: linear-gradient(135deg, #8b5cf6 0%, #60a5fa 100%);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-navy-950 text-slate-100 font-sans antialiased selection:bg-brand-purple selection:text-white overflow-x-hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Modal Container (Replaces alert/confirm) -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div id="modal-box" class="glass-card rounded-2xl max-w-lg w-full p-6 border border-purple-500/30 animate-fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modal-title" class="text-xl font-bold text-white flex items-center gap-2"></h3>
+                <button onclick="UI.closeModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="modal-body" class="text-slate-300 text-sm leading-relaxed mb-6"></div>
+            <div id="modal-actions" class="flex justify-end gap-3"></div>
+        </div>
+    </div>
+
+    <!-- Main Application Shell -->
+    <div class="flex min-h-screen">
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" onclick="UI.toggleSidebar(false)" class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden backdrop-blur-xs"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="glass-sidebar fixed lg:sticky top-0 left-0 z-40 h-screen w-72 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+            <!-- Logo Header -->
+            <div class="p-5 flex items-center justify-between border-b border-indigo-500/15">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="App.navigate('dashboard')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-lg tracking-tight text-white">NRI <span class="gradient-text">ExamVerse</span></h1>
+                        <p class="text-[11px] text-slate-400 font-medium tracking-wider uppercase">NRIU × NIAT Portal</p>
+                    </div>
+                </div>
+                <button onclick="UI.toggleSidebar(false)" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Student Mini Card -->
+            <div class="p-4 mx-3 mt-4 rounded-xl bg-navy-800/60 border border-indigo-500/20 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shrink-0">
+                    KS
+                </div>
+                <div class="overflow-hidden">
+                    <p id="sidebar-student-name" class="text-sm font-semibold text-white truncate">Kola Santhosh</p>
+                    <p class="text-xs text-indigo-300 truncate">B.Tech CSE (AI & ML) • Yr 1</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links (14 Modules) -->
+            <nav id="sidebar-nav" class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                <!-- Populated dynamically by JS -->
+            </nav>
+
+            <!-- Demo Security Disclaimer Badge -->
+            <div class="p-3 m-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[11px] text-amber-200/90 leading-snug">
+                <div class="flex items-center gap-1.5 font-semibold text-amber-400 mb-1">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Frontend Demo Mode</span>
+                </div>
+                Data stored in browser LocalStorage. Not for official university grading.
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Top Header -->
+            <header class="glass-header sticky top-0 z-20 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button onclick="UI.toggleSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-navy-800/80 text-slate-200 hover:bg-navy-700 border border-indigo-500/20">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h2 id="page-title" class="text-lg sm:text-xl font-bold text-white">Dashboard</h2>
+                        <p id="page-subtitle" class="text-xs text-slate-400 hidden sm:block">Welcome back to NRI University & NIAT Integrated Learning Hub</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Quick Exam Shortcut -->
+                    <button onclick="App.navigate('examination')" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-semibold transition">
+                        <i data-lucide="file-check-2" class="w-4 h-4"></i>
+                        <span>Exam Portal</span>
+                    </button>
+                    <!-- JARVIS Quick Trigger -->
+                    <button onclick="App.navigate('jarvis')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl gradient-btn text-white text-xs font-semibold shadow-md">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                        <span class="hidden md:inline">JARVIS AI</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Module Content Container -->
+            <main id="app-content" class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-fade-in">
+                <!-- Views rendered dynamically here -->
+            </main>
+
+            <!-- Footer with Required Frontend Disclaimer & Run Instructions -->
+            <footer class="border-t border-indigo-500/15 bg-navy-900/60 px-6 py-4 text-xs text-slate-400">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+                    <p>© 2026 <strong class="text-slate-200">NRI ExamVerse</strong> • NRI University (Pothavareppadu, Vijayawada) × NIAT (NxtWave)</p>
+                    <p class="text-center md:text-right text-amber-300/80">
+                        ⚠️ <strong>Notice:</strong> LocalStorage frontend prototype only. Client-side storage & timers are unsuitable for official proctored examinations.
+                    </p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        /**
+         * ============================================================================
+         * NRI EXAMVERSE - COMPLETE FRONTEND ARCHITECTURE (VANILLA JS + LOCALSTORAGE)
+         * ============================================================================
+         * Student: Kola Santhosh | B.Tech CSE (AI & ML) - 1st Year
+         * University: NRI University, Pothavareppadu, Vijayawada | Partner: NIAT
+         */
+
+        // ============================================================================
+        // 1. COMPREHENSIVE QUESTION BANK (15+ QUESTIONS PER SUBJECT)
+        // ============================================================================
+        const QUESTION_BANK = {
+            "Python": [
+                { id: "py1", diff: "Beginner", q: "Which keyword is used to define a function in Python?", opts: ["func", "define", "def", "function"], ans: 2, exp: "In Python, functions are defined using the 'def' keyword followed by the function name and parentheses." },
+                { id: "py2", diff: "Beginner", q: "What is the output of print(type([1, 2, 3]))?", opts: ["<class 'tuple'>", "<class 'list'>", "<class 'dict'>", "<class 'set'>"], ans: 1, exp: "Square brackets [] denote a mutable list object in Python." },
+                { id: "py3", diff: "Beginner", q: "Which operator is used for floor division in Python 3?", opts: ["/", "//", "%", "**"], ans: 1, exp: "The '//' operator divides and returns the integer value of the quotient, discarding the remainder." },
+                { id: "py4", diff: "Beginner", q: "How do you insert a single-line comment in Python?", opts: ["// comment", "/* comment */", "# comment", "-- comment"], ans: 2, exp: "Python uses the hash symbol (#) to start single-line comments." },
+                { id: "py5", diff: "Beginner", q: "Which of the following data types is immutable in Python?", opts: ["List", "Dictionary", "Set", "Tuple"], ans: 3, exp: "Tuples cannot be altered after creation, making them immutable." },
+                { id: "py6", diff: "Intermediate", q: "What does the 'self' parameter in a Python class method represent?", opts: ["The class itself", "The current instance of the class", "A global variable", "The parent class"], ans: 1, exp: "'self' refers to the specific object instance invoking the method." },
+                { id: "py7", diff: "Intermediate", q: "What is the output of: 'NRI_NIAT'[::-1]?", opts: ["NRI_NIAT", "TAIN_IRN", "Error", "N"], ans: 1, exp: "Slicing with step -1 reverses the string completely." },
+                { id: "py8", diff: "Intermediate", q: "Which built-in function returns an iterator of tuples pairing elements from two lists?", opts: ["map()", "zip()", "enumerate()", "filter()"], ans: 1, exp: "zip() aggregates elements from multiple iterables into tuples." },
+                { id: "py9", diff: "Intermediate", q: "What exception is raised when accessing a non-existent key in a dictionary?", opts: ["IndexError", "ValueError", "KeyError", "AttributeError"], ans: 2, exp: "A KeyError occurs when a dictionary key is not found." },
+                { id: "py10", diff: "Intermediate", q: "What does list comprehension [x**2 for x in range(4)] produce?", opts: ["[1, 4, 9, 16]", "[0, 1, 4, 9]", "[0, 1, 4, 9, 16]", "[1, 2, 3, 4]"], ans: 1, exp: "range(4) yields 0, 1, 2, 3. Squaring each gives [0, 1, 4, 9]." },
+                { id: "py11", diff: "Advanced", q: "What is the purpose of Python's GIL (Global Interpreter Lock)?", opts: ["Encrypts bytecode", "Allows only one thread to execute Python bytecode at a time", "Manages GPU memory", "Prevents syntax errors"], ans: 1, exp: "The GIL is a mutex in CPython that protects access to Python objects, preventing multiple threads from executing bytecodes simultaneously." },
+                { id: "py12", diff: "Advanced", q: "Which dunder method is invoked when the len() function is called on a custom object?", opts: ["__size__", "__count__", "__len__", "__length__"], ans: 2, exp: "Implementing __len__(self) enables built-in len() support on custom classes." },
+                { id: "py13", diff: "Advanced", q: "What does a Python generator function use instead of 'return' to produce a sequence lazily?", opts: ["emit", "yield", "async", "generate"], ans: 1, exp: "'yield' pauses function execution and saves local state for subsequent iterations." },
+                { id: "py14", diff: "Advanced", q: "What is the time complexity of checking membership (x in s) in a Python set?", opts: ["O(n)", "O(log n)", "O(1) average", "O(n log n)"], ans: 2, exp: "Python sets are implemented as hash tables, providing O(1) average lookup time." },
+                { id: "py15", diff: "Advanced", q: "Which decorator converts a method into a read-only attribute?", opts: ["@staticmethod", "@classmethod", "@property", "@abstractmethod"], ans: 2, exp: "@property allows a method to be accessed like an attribute without parentheses." }
+            ],
+            "C Programming": [
+                { id: "c1", diff: "Beginner", q: "Which header file is required for using printf() and scanf() in C?", opts: ["<stdlib.h>", "<stdio.h>", "<conio.h>", "<string.h>"], ans: 1, exp: "<stdio.h> stands for Standard Input Output header." },
+                { id: "c2", diff: "Beginner", q: "What is the format specifier for printing a float variable in C?", opts: ["%d", "%c", "%f", "%lf"], ans: 2, exp: "%f is used for float, while %d is for int and %c for char." },
+                { id: "c3", diff: "Beginner", q: "Every C program execution begins from which function?", opts: ["start()", "program()", "main()", "init()"], ans: 2, exp: "The main() function is the mandatory entry point of any C program." },
+                { id: "c4", diff: "Beginner", q: "Which symbol is used to denote the address-of operator in C?", opts: ["*", "&", "#", "@"], ans: 1, exp: "The ampersand (&) returns the memory address of a variable." },
+                { id: "c5", diff: "Beginner", q: "What is the size of a standard 'char' data type in C?", opts: ["1 byte", "2 bytes", "4 bytes", "8 bytes"], ans: 0, exp: "By the C standard, sizeof(char) is always 1 byte." },
+                { id: "c6", diff: "Intermediate", q: "Which function dynamically allocates memory and initializes all bits to zero?", opts: ["malloc()", "calloc()", "realloc()", "free()"], ans: 1, exp: "calloc() allocates contiguous blocks and zero-initializes them, unlike malloc()." },
+                { id: "c7", diff: "Intermediate", q: "What is a dangling pointer in C?", opts: ["A pointer initialized to NULL", "A pointer pointing to freed/deallocated memory", "A pointer to a function", "A void pointer"], ans: 1, exp: "A dangling pointer references a memory location that has already been freed." },
+                { id: "c8", diff: "Intermediate", q: "Which storage class retains variable values across multiple function calls?", opts: ["auto", "register", "static", "extern"], ans: 2, exp: "Static local variables persist in memory for the lifetime of the program." },
+                { id: "c9", diff: "Intermediate", q: "What does the 'break' statement do inside a nested loop?", opts: ["Exits all loops", "Exits only the innermost loop", "Skips current iteration", "Terminates the program"], ans: 1, exp: "'break' terminates only the immediately enclosing loop or switch block." },
+                { id: "c10", diff: "Intermediate", q: "How are strings terminated in C?", opts: ["'\\n'", "'\\0'", "EOF", "'\\t'"], ans: 1, exp: "C strings are character arrays terminated by the null character '\\0'." },
+                { id: "c11", diff: "Advanced", q: "What is the difference between a struct and a union in C?", opts: ["Unions cannot hold ints", "Union members share the same memory location", "Structs are faster", "No difference"], ans: 1, exp: "In a union, all members share memory equal to the size of the largest member." },
+                { id: "c12", diff: "Advanced", q: "What does 'int (*ptr)[5];' declare?", opts: ["Array of 5 int pointers", "Pointer to an array of 5 integers", "Function returning int", "Invalid syntax"], ans: 1, exp: "Parentheses bind * to ptr first, making ptr a pointer to an array of 5 ints." },
+                { id: "c13", diff: "Advanced", q: "Which bitwise operator is used to toggle a specific bit in C?", opts: ["&", "|", "^", "~"], ans: 2, exp: "Bitwise XOR (^) toggles bits when masked with 1." },
+                { id: "c14", diff: "Advanced", q: "What happens if free() is called twice on the same pointer?", opts: ["Safely ignored", "Double free undefined behavior / crash", "Frees adjacent memory", "Resets pointer to NULL"], ans: 1, exp: "Calling free() twice on the same address corrupts heap metadata (undefined behavior)." },
+                { id: "c15", diff: "Advanced", q: "Which preprocessor directive prevents multiple inclusions of a header file?", opts: ["#pragma once / #ifndef", "#include", "#define", "#undef"], ans: 0, exp: "Include guards (#ifndef / #define / #endif) or #pragma once prevent duplicate definitions." }
+            ],
+            "Mathematics": [
+                { id: "m1", diff: "Beginner", q: "What is the derivative of sin(x) with respect to x?", opts: ["-cos(x)", "cos(x)", "tan(x)", "-sin(x)"], ans: 1, exp: "d/dx [sin(x)] = cos(x)." },
+                { id: "m2", diff: "Beginner", q: "What is the determinant of a 2x2 identity matrix?", opts: ["0", "1", "2", "-1"], ans: 1, exp: "det([[1,0],[0,1]]) = (1*1) - (0*0) = 1." },
+                { id: "m3", diff: "Beginner", q: "Evaluate: lim (x -> 0) [sin(x) / x]", opts: ["0", "Infinity", "1", "Undefined"], ans: 2, exp: "Standard trigonometric limit: lim(x->0) sin(x)/x = 1." },
+                { id: "m4", diff: "Beginner", q: "What is the integral of 1/x dx?", opts: ["x^2", "ln|x| + C", "e^x + C", "-1/x^2 + C"], ans: 1, exp: "The antiderivative of 1/x is the natural logarithm ln|x| + C." },
+                { id: "m5", diff: "Beginner", q: "If Matrix A is of order 3x2 and Matrix B is 2x4, what is the order of AB?", opts: ["2x2", "3x4", "3x2", "Not defined"], ans: 1, exp: "Multiplying (3x2) and (2x4) matrices yields a (3x4) matrix." },
+                { id: "m6", diff: "Intermediate", q: "According to Cayley-Hamilton theorem, every square matrix satisfies its own:", opts: ["Transpose", "Inverse", "Characteristic equation", "Adjoint"], ans: 2, exp: "Every square matrix satisfies its own characteristic polynomial equation." },
+                { id: "m7", diff: "Intermediate", q: "What is the sum of the eigenvalues of a square matrix equal to?", opts: ["Determinant", "Rank", "Trace of the matrix", "Nullity"], ans: 2, exp: "The sum of eigenvalues equals the trace (sum of main diagonal elements)." },
+                { id: "m8", diff: "Intermediate", q: "Which theorem relates a line integral around a simple closed curve to a double integral?", opts: ["Stokes' Theorem", "Green's Theorem", "Gauss Divergence Theorem", "Rolle's Theorem"], ans: 1, exp: "Green's theorem converts a line integral around a closed plane curve C into a double integral over region D." },
+                { id: "m9", diff: "Intermediate", q: "What is the Laplace transform of f(t) = 1?", opts: ["1", "1/s", "s", "1/s^2"], ans: 1, exp: "L{1} = integral from 0 to inf of e^(-st) dt = 1/s (for s > 0)." },
+                { id: "m10", diff: "Intermediate", q: "For a symmetric matrix, all eigenvalues are always:", opts: ["Imaginary", "Zero", "Real", "Negative"], ans: 2, exp: "Real symmetric matrices always have real eigenvalues." },
+                { id: "m11", diff: "Advanced", q: "If curl(F) = 0 for a vector field F, then F is called:", opts: ["Solenoidal", "Irrotational (Conservative)", "Divergent", "Harmonic"], ans: 1, exp: "A vector field with zero curl is irrotational and can be expressed as the gradient of a scalar potential." },
+                { id: "m12", diff: "Advanced", q: "What is the rank of a 4x4 skew-symmetric matrix with non-zero determinant?", opts: ["1", "2", "3", "4"], ans: 3, exp: "Since determinant is non-zero, the 4x4 matrix is full rank (Rank = 4)." },
+                { id: "m13", diff: "Advanced", q: "In Taylor series expansion around x = a, the coefficient of (x-a)^n is:", opts: ["f^(n)(a)", "f^(n)(a) / n!", "f(a) / n!", "n! * f(a)"], ans: 1, exp: "Taylor series coefficient is the nth derivative at 'a' divided by n factorial." },
+                { id: "m14", diff: "Advanced", q: "Which test is used to determine convergence of series sum(1 / n^p)?", opts: ["p-series test", "Ratio test", "Root test", "Leibniz test"], ans: 0, exp: "The p-series converges if p > 1 and diverges if p <= 1." },
+                { id: "m15", diff: "Advanced", q: "What is the Jacobian J(u,v) used for in multivariable calculus?", opts: ["Finding eigenvalues", "Change of variables in multiple integrals", "Solving ODEs", "Fourier series"], ans: 1, exp: "The Jacobian determinant scales area/volume elements during coordinate transformations." }
+            ],
+            "Data Structures": [
+                { id: "ds1", diff: "Beginner", q: "Which data structure follows the LIFO (Last In, First Out) principle?", opts: ["Queue", "Stack", "Linked List", "Tree"], ans: 1, exp: "A Stack removes the most recently added element first (LIFO)." },
+                { id: "ds2", diff: "Beginner", q: "Which data structure follows the FIFO (First In, First Out) principle?", opts: ["Stack", "Queue", "Binary Search Tree", "Graph"], ans: 1, exp: "A Queue processes elements in the exact order they arrived (FIFO)." },
+                { id: "ds3", diff: "Beginner", q: "What is the time complexity of accessing an element in an array by index?", opts: ["O(1)", "O(n)", "O(log n)", "O(n^2)"], ans: 0, exp: "Arrays provide constant O(1) random access via base address + offset calculation." },
+                { id: "ds4", diff: "Beginner", q: "In a singly linked list, each node contains data and:", opts: ["Two pointers", "Pointer to the next node", "Index number", "Array size"], ans: 1, exp: "Each node holds data and a reference/pointer to the subsequent node." },
+                { id: "ds5", diff: "Beginner", q: "What is the maximum number of children a binary tree node can have?", opts: ["1", "2", "3", "Unlimited"], ans: 1, exp: "In a binary tree, every node has at most two children (left and right)." },
+                { id: "ds6", diff: "Intermediate", q: "Which tree traversal visits Left subtree, then Root, then Right subtree?", opts: ["Preorder", "Inorder", "Postorder", "Level-order"], ans: 1, exp: "Inorder traversal (Left-Root-Right) yields sorted values on a Binary Search Tree." },
+                { id: "ds7", diff: "Intermediate", q: "What is the worst-case time complexity of Binary Search?", opts: ["O(1)", "O(log n)", "O(n)", "O(n log n)"], ans: 1, exp: "Binary search halves the search space on each step, taking O(log n) comparisons." },
+                { id: "ds8", diff: "Intermediate", q: "Which data structure is typically used to implement Breadth-First Search (BFS)?", opts: ["Stack", "Queue", "Priority Queue", "Hash Map"], ans: 1, exp: "BFS explores neighbors level-by-level using a FIFO Queue." },
+                { id: "ds9", diff: "Intermediate", q: "What is the balance factor of any node in an AVL tree?", opts: ["0, 1, or 2", "-1, 0, or 1", "-2 to +2", "Any integer"], ans: 1, exp: "AVL trees maintain height balance where |height(left) - height(right)| <= 1." },
+                { id: "ds10", diff: "Intermediate", q: "Which sorting algorithm has the best average-case time complexity among these?", opts: ["Bubble Sort", "Insertion Sort", "Merge Sort", "Selection Sort"], ans: 2, exp: "Merge Sort runs in O(n log n) across best, average, and worst cases." },
+                { id: "ds11", diff: "Advanced", q: "Which algorithm finds the shortest path in a weighted graph with non-negative edges?", opts: ["Prim's Algorithm", "Dijkstra's Algorithm", "Kruskal's Algorithm", "DFS"], ans: 1, exp: "Dijkstra's algorithm greedily finds shortest paths from a source vertex for non-negative edge weights." },
+                { id: "ds12", diff: "Advanced", q: "What is the time complexity of building a binary heap from an unsorted array of n elements?", opts: ["O(n log n)", "O(n)", "O(log n)", "O(n^2)"], ans: 1, exp: "Using bottom-up heapify, building a binary heap takes linear O(n) time." },
+                { id: "ds13", diff: "Advanced", q: "Which technique resolves hash collisions by storing elements in linked lists at each bucket?", opts: ["Linear Probing", "Separate Chaining", "Quadratic Probing", "Double Hashing"], ans: 1, exp: "Separate chaining maintains a linked list (or balanced tree) at each hash table slot." },
+                { id: "ds14", diff: "Advanced", q: "A B-Tree is most commonly used in:", opts: ["CPU Registers", "Database Indexing & File Systems", "Recursion stacks", "Network packets"], ans: 1, exp: "B-Trees minimize disk I/O operations, making them ideal for databases and file systems." },
+                { id: "ds15", diff: "Advanced", q: "Which data structure efficiently supports prefix-based string searches (autocomplete)?", opts: ["Min-Heap", "Trie (Prefix Tree)", "Circular Queue", "Doubly Linked List"], ans: 1, exp: "A Trie stores characters along tree edges, enabling O(L) prefix lookups." }
+            ],
+            "AI and ML": [
+                { id: "ai1", diff: "Beginner", q: "Which type of machine learning uses labeled training data?", opts: ["Unsupervised Learning", "Supervised Learning", "Reinforcement Learning", "Clustering"], ans: 1, exp: "Supervised learning trains models on input-output pairs where ground truth labels are known." },
+                { id: "ai2", diff: "Beginner", q: "Which algorithm is used for predicting continuous numerical values?", opts: ["Logistic Regression", "Linear Regression", "K-Means", "Apriori"], ans: 1, exp: "Linear regression models the relationship between features and a continuous target variable." },
+                { id: "ai3", diff: "Beginner", q: "K-Means is an example of which machine learning paradigm?", opts: ["Supervised Classification", "Unsupervised Clustering", "Reinforcement Learning", "Deep Reinforcement"], ans: 1, exp: "K-Means partitions unlabeled data into K distinct clusters." },
+                { id: "ai4", diff: "Beginner", q: "What does 'AI' stand for?", opts: ["Automated Interface", "Artificial Intelligence", "Algorithmic Integration", "Analytical Inference"], ans: 1, exp: "AI stands for Artificial Intelligence." },
+                { id: "ai5", diff: "Beginner", q: "Which Python library is widely used for deep learning tensors and neural networks?", opts: ["PyTorch", "BeautifulSoup", "Flask", "Tkinter"], ans: 0, exp: "PyTorch (alongside TensorFlow) is a premier deep learning framework." },
+                { id: "ai6", diff: "Intermediate", q: "What happens when a model memorizes training data but performs poorly on unseen test data?", opts: ["Underfitting", "Overfitting", "Regularization", "Normalization"], ans: 1, exp: "Overfitting occurs when a model captures noise in training data, hurting generalization." },
+                { id: "ai7", diff: "Intermediate", q: "Which activation function outputs values strictly between 0 and 1?", opts: ["ReLU", "Sigmoid", "Tanh", "Leaky ReLU"], ans: 1, exp: "The sigmoid function f(x) = 1 / (1 + e^-x) squashes inputs into (0, 1)." },
+                { id: "ai8", diff: "Intermediate", q: "What is the purpose of a confusion matrix?", opts: ["Encrypt weights", "Evaluate classification model performance", "Reduce dimensionality", "Clean missing data"], ans: 1, exp: "A confusion matrix displays True Positives, True Negatives, False Positives, and False Negatives." },
+                { id: "ai9", diff: "Intermediate", q: "Which technique reduces dataset dimensionality while preserving maximum variance?", opts: ["PCA (Principal Component Analysis)", "Dropout", "Batch Normalization", "SMOTE"], ans: 0, exp: "PCA projects features onto orthogonal principal components capturing highest variance." },
+                { id: "ai10", diff: "Intermediate", q: "In Gradient Descent, what controls the step size during weight updates?", opts: ["Batch size", "Learning rate", "Epoch count", "Momentum"], ans: 1, exp: "The learning rate (alpha) scales the gradient step during parameter optimization." },
+                { id: "ai11", diff: "Advanced", q: "Which neural network architecture introduced the Self-Attention mechanism in 2017?", opts: ["ResNet", "Transformer", "LSTM", "AlexNet"], ans: 1, exp: "The Transformer ('Attention Is All You Need') replaced recurrence with multi-head self-attention." },
+                { id: "ai12", diff: "Advanced", q: "What problem do LSTM and GRU networks specifically solve compared to vanilla RNNs?", opts: ["Overfitting", "Vanishing Gradient Problem", "High memory usage", "Slow inference"], ans: 1, exp: "Gated mechanisms in LSTMs/GRUs preserve long-term dependencies against vanishing gradients." },
+                { id: "ai13", diff: "Advanced", q: "In Generative AI, what does RAG stand for?", opts: ["Random Access Generation", "Retrieval-Augmented Generation", "Recurrent Attention Graph", "Rapid AI Grounding"], ans: 1, exp: "RAG combines external vector database retrieval with LLM text generation to reduce hallucinations." },
+                { id: "ai14", diff: "Advanced", q: "Which loss function is standard for multi-class classification with Softmax output?", opts: ["Mean Squared Error", "Categorical Cross-Entropy", "Hinge Loss", "Huber Loss"], ans: 1, exp: "Categorical Cross-Entropy measures divergence between predicted probability distributions and true labels." },
+                { id: "ai15", diff: "Advanced", q: "What is L1 regularization (Lasso) known for producing in feature weights?", opts: ["Sparsity (exact zero weights)", "Uniform weights", "Larger weights", "Non-linear boundaries"], ans: 0, exp: "L1 penalty drives less important feature coefficients to exact zero, performing feature selection." }
+            ],
+            "Aptitude": [
+                { id: "ap1", diff: "Beginner", q: "A train 150m long passes a pole in 15 seconds. What is its speed in km/hr?", opts: ["30 km/hr", "36 km/hr", "45 km/hr", "54 km/hr"], ans: 1, exp: "Speed = 150/15 = 10 m/s. In km/hr: 10 * (18/5) = 36 km/hr." },
+                { id: "ap2", diff: "Beginner", q: "If 20% of a number is 50, what is 60% of that same number?", opts: ["100", "150", "200", "250"], ans: 1, exp: "60% is 3 times 20%, so 50 * 3 = 150." },
+                { id: "ap3", diff: "Beginner", q: "Find the next number in the series: 2, 6, 12, 20, 30, ?", opts: ["40", "42", "44", "36"], ans: 1, exp: "Differences are +4, +6, +8, +10, so next is 30 + 12 = 42." },
+                { id: "ap4", diff: "Beginner", q: "The average of 5 consecutive odd numbers is 25. What is the largest number?", opts: ["27", "29", "31", "25"], ans: 1, exp: "The numbers are 21, 23, 25, 27, 29. The largest is 29." },
+                { id: "ap5", diff: "Beginner", q: "A can do a piece of work in 10 days and B in 15 days. Together they finish in:", opts: ["5 days", "6 days", "8 days", "12.5 days"], ans: 1, exp: "Combined rate = 1/10 + 1/15 = 5/30 = 1/6. Hence, 6 days." },
+                { id: "ap6", diff: "Intermediate", q: "What is the angle between the hour hand and minute hand of a clock at 3:30?", opts: ["90°", "75°", "60°", "105°"], ans: 1, exp: "Angle = |30*3 - 5.5*30| = |90 - 165| = 75 degrees." },
+                { id: "ap7", diff: "Intermediate", q: "Two dice are thrown simultaneously. What is the probability of getting a sum of 7?", opts: ["1/6", "1/9", "1/12", "5/36"], ans: 0, exp: "Favorable outcomes: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6/36 = 1/6." },
+                { id: "ap8", diff: "Intermediate", q: "A shopkeeper sells an article at ₹480 gaining 20%. What was the cost price?", opts: ["₹380", "₹400", "₹420", "₹360"], ans: 1, exp: "CP = 480 / 1.20 = ₹400." },
+                { id: "ap9", diff: "Intermediate", q: "In how many different ways can the letters of the word 'DATA' be arranged?", opts: ["24", "12", "6", "16"], ans: 1, exp: "4! / 2! (since 'A' repeats twice) = 24 / 2 = 12 ways." },
+                { id: "ap10", diff: "Intermediate", q: "If SOUTH-EAST becomes NORTH, what will NORTH-EAST become?", opts: ["WEST", "SOUTH-WEST", "NORTH-WEST", "SOUTH"], ans: 0, exp: "Rotating 135° anticlockwise shifts South-East to North, and North-East to West." },
+                { id: "ap11", diff: "Advanced", q: "A sum of money doubles itself in 8 years at simple interest. In how many years will it triple?", opts: ["12 years", "16 years", "24 years", "18 years"], ans: 1, exp: "100% interest takes 8 years, so 200% interest (tripling) takes 16 years." },
+                { id: "ap12", diff: "Advanced", q: "Find the remainder when 2^31 is divided by 5.", opts: ["1", "2", "3", "4"], ans: 2, exp: "Powers of 2 mod 5 cycle: 2, 4, 3, 1. 31 = 4*7 + 3, so 3rd in cycle = 3." },
+                { id: "ap13", diff: "Advanced", q: "A boat goes 12 km upstream in 3 hours and 18 km downstream in 3 hours. Speed of stream is:", opts: ["1 km/hr", "2 km/hr", "5 km/hr", "1.5 km/hr"], ans: 0, exp: "Upstream = 4 km/hr, Downstream = 6 km/hr. Stream = (6 - 4)/2 = 1 km/hr." },
+                { id: "ap14", diff: "Advanced", q: "How many handshake occur in a room of 10 people if everyone shakes hands once with each other?", opts: ["90", "45", "50", "100"], ans: 1, exp: "10C2 = (10 * 9) / 2 = 45 handshakes." },
+                { id: "ap15", diff: "Advanced", q: "If log10(2) = 0.3010, how many digits are there in 2^100?", opts: ["30", "31", "32", "100"], ans: 1, exp: "Digits = floor(100 * 0.3010) + 1 = floor(30.10) + 1 = 31." }
+            ],
+            "NIAT Modules": [
+                { id: "nt1", diff: "Beginner", q: "In Web Development, which HTML5 tag defines semantic navigation links?", opts: ["<div id='nav'>", "<nav>", "<header>", "<navigate>"], ans: 1, exp: "The semantic <nav> element represents a section of navigation links." },
+                { id: "nt2", diff: "Beginner", q: "Which SQL command is used to retrieve records from a database table?", opts: ["GET", "FETCH", "SELECT", "EXTRACT"], ans: 2, exp: "SELECT queries and retrieves data from relational tables." },
+                { id: "nt3", diff: "Beginner", q: "In Java, which keyword is used to inherit a class?", opts: ["implements", "extends", "inherits", "super"], ans: 1, exp: "The 'extends' keyword establishes class inheritance in Java." },
+                { id: "nt4", diff: "Beginner", q: "Which CSS property enables Flexbox layout on a container?", opts: ["position: flex", "display: flex", "layout: flex", "float: flex"], ans: 1, exp: "Setting display: flex turns an element into a flex container." },
+                { id: "nt5", diff: "Beginner", q: "What does API stand for in modern software engineering?", opts: ["Application Programming Interface", "Automated Protocol Integration", "Applied Process Index", "Advanced Program Instruction"], ans: 0, exp: "API stands for Application Programming Interface." },
+                { id: "nt6", diff: "Intermediate", q: "Which SQL clause filters aggregated groups created by GROUP BY?", opts: ["WHERE", "HAVING", "ORDER BY", "DISTINCT"], ans: 1, exp: "HAVING filters grouped rows after aggregation, whereas WHERE filters individual rows prior." },
+                { id: "nt7", diff: "Intermediate", q: "In JavaScript, what does '===' check compared to '=='?", opts: ["Value only", "Value and Data Type (strict equality)", "Reference only", "Assignment"], ans: 1, exp: "'===' checks strict equality without type coercion." },
+                { id: "nt8", diff: "Intermediate", q: "In Java OOP, what is polymorphism?", opts: ["Hiding private fields", "Ability of an object/method to take many forms", "Deleting unused objects", "Connecting to SQL"], ans: 1, exp: "Polymorphism allows method overloading and overriding across class hierarchies." },
+                { id: "nt9", diff: "Intermediate", q: "Which HTTP status code indicates a resource was successfully created?", opts: ["200 OK", "201 Created", "404 Not Found", "500 Internal Server Error"], ans: 1, exp: "201 Created confirms a new resource was generated via POST/PUT." },
+                { id: "nt10", diff: "Intermediate", q: "In Prompt Engineering for Generative AI, 'Few-Shot Prompting' means:", opts: ["Asking very short questions", "Providing a few input-output examples inside the prompt", "Limiting token output to 10 words", "Running the model 3 times"], ans: 1, exp: "Few-shot prompting guides LLM reasoning by supplying concrete examples in context." },
+                { id: "nt11", diff: "Advanced", q: "What is Database Normalization (3NF) primarily designed to eliminate?", opts: ["Primary keys", "Data redundancy and update anomalies", "Indexes", "Foreign keys"], ans: 1, exp: "Third Normal Form removes transitive dependencies to prevent redundancy and anomalies." },
+                { id: "nt12", diff: "Advanced", q: "In Java, which collection guarantees unique elements in sorted ascending order?", opts: ["HashSet", "ArrayList", "TreeSet", "LinkedList"], ans: 2, exp: "TreeSet uses a Red-Black tree to keep unique elements sorted." },
+                { id: "nt13", diff: "Advanced", q: "What does JWT stand for in modern web authentication?", opts: ["Java Web Toolkit", "JSON Web Token", "JavaScript Worker Thread", "Joint Web Transfer"], ans: 1, exp: "JSON Web Token (JWT) securely transmits claims between parties as a signed JSON object." },
+                { id: "nt14", diff: "Advanced", q: "In LLMs, what does the 'Temperature' hyperparameter control?", opts: ["GPU heat limit", "Randomness/creativity of next-token sampling", "Context window size", "Training epochs"], ans: 1, exp: "Lower temperature makes outputs deterministic; higher values increase token diversity." },
+                { id: "nt15", diff: "Advanced", q: "Which SQL JOIN returns all rows from the left table and matching rows from the right?", opts: ["INNER JOIN", "LEFT JOIN", "CROSS JOIN", "SELF JOIN"], ans: 1, exp: "LEFT (OUTER) JOIN preserves all records from the left table with NULLs where right matches don't exist." }
+            ]
+        };
+
+        // ============================================================================
+        // 2. VERIFIED B.TECH & NIAT SYLLABUS + SUPPLEMENTARY DATA
+        // ============================================================================
+        const BTECH_SYLLABUS = [
+            {
+                code: "MA101",
+                name: "Engineering Mathematics - I",
+                semester: "Semester 1",
+                credits: 4,
+                officialUnits: [
+                    { unit: "Unit I: Matrices & Linear Algebra", topics: ["Rank of a matrix, Echelon form", "System of linear equations", "Eigenvalues & Eigenvectors", "Cayley-Hamilton Theorem"] },
+                    { unit: "Unit II: Differential Calculus", topics: ["Rolle's & Mean Value Theorems", "Taylor's & Maclaurin's Series", "Partial Differentiation", "Jacobians & Maxima/Minima"] },
+                    { unit: "Unit III: Integral Calculus & Vector Calculus", topics: ["Multiple Integrals (Double & Triple)", "Gradient, Divergence & Curl", "Green's, Stokes' & Gauss Divergence Theorems"] }
+                ],
+                supplementary: ["NumPy Linear Algebra Lab Exercises", "Visualizing Vector Fields in Python", "GATE Mathematics Foundation Problem Set"]
+            },
+            {
+                code: "CS101",
+                name: "Problem Solving & C Programming",
+                semester: "Semester 1",
+                credits: 4,
+                officialUnits: [
+                    { unit: "Unit I: Introduction to Algorithms & C Basics", topics: ["Flowcharts & Pseudocode", "Data types, Operators & Expressions", "Control Statements (if-else, switch, loops)"] },
+                    { unit: "Unit II: Arrays, Strings & Functions", topics: ["1D & 2D Arrays", "String handling functions", "Recursion & Storage Classes"] },
+                    { unit: "Unit III: Pointers, Structures & File I/O", topics: ["Pointer arithmetic & Dynamic Memory Allocation", "Structures & Unions", "Sequential & Random File Handling"] }
+                ],
+                supplementary: ["NIAT Competitive C Track", "Memory Layout & Debugging with GDB", "50 Pointer Tracing Challenges"]
+            },
+            {
+                code: "PY102",
+                name: "Python Programming for AI",
+                semester: "Semester 2",
+                credits: 4,
+                officialUnits: [
+                    { unit: "Unit I: Python Core & Data Structures", topics: ["Variables, Control Flow & Functions", "Lists, Tuples, Sets & Dictionaries", "List Comprehensions & Lambda Functions"] },
+                    { unit: "Unit II: Object-Oriented Python & Modules", topics: ["Classes, Inheritance & Polymorphism", "Exception Handling & File Operations", "Standard Libraries (math, random, datetime)"] },
+                    { unit: "Unit III: Scientific Computing Foundations", topics: ["NumPy Arrays & Broadcasting", "Pandas DataFrames", "Matplotlib Data Visualization"] }
+                ],
+                supplementary: ["NIAT Python Mastery Bootcamp", "Building CLI Tools & APIs", "Intro to Jupyter Notebooks for AI/ML"]
+            },
+            {
+                code: "PH101",
+                name: "Engineering Physics",
+                semester: "Semester 1",
+                credits: 3,
+                officialUnits: [
+                    { unit: "Unit I: Wave Optics & Lasers", topics: ["Interference, Diffraction & Polarization", "Ruby & He-Ne Lasers", "Optical Fibers & Applications"] },
+                    { unit: "Unit II: Quantum Mechanics & Semiconductors", topics: ["De-Broglie Hypothesis & Schrödinger Wave Equation", "Intrinsic & Extrinsic Semiconductors", "Hall Effect & PN Junctions"] }
+                ],
+                supplementary: ["Quantum Computing Qubit Primer", "Semiconductor Physics in AI Hardware"]
+            },
+            {
+                code: "CH102",
+                name: "Engineering Chemistry",
+                semester: "Semester 2",
+                credits: 3,
+                officialUnits: [
+                    { unit: "Unit I: Electrochemistry & Energy Systems", topics: ["Nernst Equation & Batteries (Li-ion)", "Fuel Cells & Corrosion Control"] },
+                    { unit: "Unit II: Polymers & Nanomaterials", topics: ["Conducting Polymers", "Carbon Nanotubes & Graphene Applications"] }
+                ],
+                supplementary: ["Green Energy Storage Case Studies", "Nanotech Sensors Overview"]
+            },
+            {
+                code: "ME103",
+                name: "Engineering Graphics & CAD",
+                semester: "Semester 1",
+                credits: 3,
+                officialUnits: [
+                    { unit: "Unit I: Projections of Points, Lines & Planes", topics: ["Orthographic Projections", "Isometric Views", "AutoCAD 2D Drafting Basics"] }
+                ],
+                supplementary: ["3D CAD Modeling Basics", "Spatial Visualization Drills"]
+            },
+            {
+                code: "HS101",
+                name: "Communicative English & Soft Skills",
+                semester: "Semester 1",
+                credits: 2,
+                officialUnits: [
+                    { unit: "Unit I: Technical Communication", topics: ["Reading Comprehension & Precis Writing", "Formal Emails & Technical Reports", "Group Discussions & Presentations"] }
+                ],
+                supplementary: ["NIAT Interview & Resume Workshop", "Public Speaking Confidence Drills"]
+            }
+        ];
+
+        const NIAT_TRACKS = [
+            { id: "nt-prog", category: "Programming Fundamentals", level: "Core Foundation", modules: 12, completed: 10, desc: "Logic building, flowcharts, complexity analysis, and problem decomposition." },
+            { id: "nt-py", category: "Python", level: "Core Foundation", modules: 16, completed: 14, desc: "Clean Pythonic code, OOP design, iterators, generators, and scripting." },
+            { id: "nt-java", category: "Java", level: "Industry Track", modules: 14, completed: 8, desc: "JVM internals, OOP pillars, Collections Framework, and exception handling." },
+            { id: "nt-dsa", category: "Data Structures", level: "Industry Track", modules: 20, completed: 11, desc: "Arrays, linked lists, stacks, queues, trees, graphs, and dynamic programming." },
+            { id: "nt-web", category: "Web Development", level: "Full-Stack Track", modules: 18, completed: 15, desc: "Responsive HTML5, modern CSS, Tailwind, DOM manipulation, and REST APIs." },
+            { id: "nt-sql", category: "SQL", level: "Data Track", modules: 10, completed: 9, desc: "Relational modeling, joins, subqueries, window functions, and indexing." },
+            { id: "nt-ai", category: "Artificial Intelligence", level: "AI & ML Specialization", modules: 14, completed: 6, desc: "Search algorithms, knowledge representation, heuristics, and intelligent agents." },
+            { id: "nt-ml", category: "Machine Learning", level: "AI & ML Specialization", modules: 16, completed: 5, desc: "Supervised/unsupervised algorithms, feature engineering, and model evaluation." },
+            { id: "nt-genai", category: "Generative AI", level: "Cutting-Edge AI", modules: 12, completed: 7, desc: "LLMs, prompt engineering, embeddings, vector databases, and RAG pipelines." },
+            { id: "nt-apt", category: "Aptitude", level: "Placement Readiness", modules: 15, completed: 12, desc: "Quantitative aptitude, logical reasoning, data interpretation, and verbal ability." }
+        ];
+
+        // ============================================================================
+        // 3. CODING CHALLENGES DATA (PYTHON, C, C++, JAVA, JAVASCRIPT)
+        // ============================================================================
+        const CODING_CHALLENGES = [
+            {
+                id: "code-1",
+                title: "Two Sum Indices",
+                difficulty: "Easy",
+                topic: "Arrays & Hashing",
+                description: "Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target. Assume each input has exactly one solution.",
+                sampleInput: "nums = [2, 7, 11, 15], target = 9",
+                expectedOutput: "[0, 1]",
+                testCases: [
+                    { input: "[2, 7, 11, 15], 9", output: "[0, 1]" },
+                    { input: "[3, 2, 4], 6", output: "[1, 2]" },
+                    { input: "[3, 3], 6", output: "[0, 1]" }
+                ],
+                starterCode: {
+                    Python: "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        diff = target - num\n        if diff in seen:\n            return [seen[diff], i]\n        seen[num] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))",
+                    C: "#include <stdio.h>\n\nint main() {\n    int nums[] = {2, 7, 11, 15};\n    int target = 9, n = 4;\n    for(int i=0; i<n; i++) {\n        for(int j=i+1; j<n; j++) {\n            if(nums[i] + nums[j] == target) {\n                printf(\"[%d, %d]\\n\", i, j);\n                return 0;\n            }\n        }\n    }\n    return 0;\n}",
+                    "C++": "#include <iostream>\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nint main() {\n    vector<int> nums = {2, 7, 11, 15};\n    int target = 9;\n    unordered_map<int, int> mp;\n    for (int i = 0; i < nums.size(); i++) {\n        if (mp.count(target - nums[i])) {\n            cout << \"[\" << mp[target - nums[i]] << \", \" << i << \"]\" << endl;\n            break;\n        }\n        mp[nums[i]] = i;\n    }\n    return 0;\n}",
+                    Java: "import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        int[] nums = {2, 7, 11, 15};\n        int target = 9;\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            if (map.containsKey(target - nums[i])) {\n                System.out.println(\"[\" + map.get(target - nums[i]) + \", \" + i + \"]\");\n                return;\n            }\n            map.put(nums[i], i);\n        }\n    }\n}",
+                    JavaScript: "function twoSum(nums, target) {\n    const map = new Map();\n    for (let i = 0; i < nums.length; i++) {\n        const complement = target - nums[i];\n        if (map.has(complement)) return [map.get(complement), i];\n        map.set(nums[i], i);\n    }\n    return [];\n}\nconsole.log(twoSum([2, 7, 11, 15], 9));"
+                }
+            },
+            {
+                id: "code-2",
+                title: "Palindrome String Validator",
+                difficulty: "Easy",
+                topic: "Strings & Two Pointers",
+                description: "Given a string s, determine if it is a palindrome considering only alphanumeric characters and ignoring cases.",
+                sampleInput: "s = \"A man, a plan, a canal: Panama\"",
+                expectedOutput: "true",
+                testCases: [
+                    { input: "\"A man, a plan, a canal: Panama\"", output: "true" },
+                    { input: "\"race a car\"", output: "false" },
+                    { input: "\" \"", output: "true" }
+                ],
+                starterCode: {
+                    Python: "def is_palindrome(s):\n    cleaned = ''.join(c.lower() for c in s if c.isalnum())\n    return cleaned == cleaned[::-1]\n\nprint(is_palindrome(\"A man, a plan, a canal: Panama\"))",
+                    C: "#include <stdio.h>\n#include <ctype.h>\n#include <string.h>\n\nint main() {\n    char s[] = \"madam\";\n    int l = 0, r = strlen(s) - 1, ok = 1;\n    while (l < r) {\n        if (tolower(s[l++]) != tolower(s[r--])) { ok = 0; break; }\n    }\n    printf(ok ? \"true\\n\" : \"false\\n\");\n    return 0;\n}",
+                    "C++": "#include <iostream>\n#include <cctype>\nusing namespace std;\n\nint main() {\n    string s = \"A man, a plan, a canal: Panama\";\n    int l = 0, r = s.size() - 1;\n    while (l < r) {\n        while (l < r && !isalnum(s[l])) l++;\n        while (l < r && !isalnum(s[r])) r--;\n        if (tolower(s[l++]) != tolower(s[r--])) { cout << \"false\"; return 0; }\n    }\n    cout << \"true\";\n    return 0;\n}",
+                    Java: "public class Solution {\n    public static void main(String[] args) {\n        String s = \"A man, a plan, a canal: Panama\".replaceAll(\"[^a-zA-Z0-9]\", \"\").toLowerCase();\n        String rev = new StringBuilder(s).reverse().toString();\n        System.out.println(s.equals(rev));\n    }\n}",
+                    JavaScript: "function isPalindrome(s) {\n    const clean = s.toLowerCase().replace(/[^a-z0-9]/g, '');\n    return clean === clean.split('').reverse().join('');\n}\nconsole.log(isPalindrome(\"A man, a plan, a canal: Panama\"));"
+                }
+            },
+            {
+                id: "code-3",
+                title: "Fibonacci Dynamic Programming",
+                difficulty: "Medium",
+                topic: "Dynamic Programming",
+                description: "Calculate the Nth Fibonacci number in O(N) time and O(1) auxiliary space.",
+                sampleInput: "n = 10",
+                expectedOutput: "55",
+                testCases: [
+                    { input: "n = 10", output: "55" },
+                    { input: "n = 0", output: "0" },
+                    { input: "n = 15", output: "610" }
+                ],
+                starterCode: {
+                    Python: "def fib(n):\n    if n <= 1:\n        return n\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n\nprint(fib(10))",
+                    C: "#include <stdio.h>\nint main() {\n    int n = 10, a = 0, b = 1, c;\n    for(int i = 2; i <= n; i++) { c = a + b; a = b; b = c; }\n    printf(\"%d\\n\", n == 0 ? 0 : b);\n    return 0;\n}",
+                    "C++": "#include <iostream>\nusing namespace std;\nint main() {\n    int n = 10, a = 0, b = 1;\n    for(int i = 2; i <= n; i++) { int c = a + b; a = b; b = c; }\n    cout << (n == 0 ? 0 : b) << endl;\n    return 0;\n}",
+                    Java: "public class Solution {\n    public static void main(String[] args) {\n        int n = 10, a = 0, b = 1;\n        for (int i = 2; i <= n; i++) { int c = a + b; a = b; b = c; }\n        System.out.println(n == 0 ? 0 : b);\n    }\n}",
+                    JavaScript: "function fib(n) {\n    if (n <= 1) return n;\n    let a = 0, b = 1;\n    for (let i = 2; i <= n; i++) [a, b] = [b, a + b];\n    return b;\n}\nconsole.log(fib(10));"
+                }
+            }
+        ];
+
+        // ============================================================================
+        // 4. PREVIOUS PAPERS & STUDY MATERIALS DATA
+        // ============================================================================
+        const PREVIOUS_PAPERS = [
+            { id: "pp1", title: "NRIU B.Tech R23 Sem-1 End Exam: Engineering Mathematics-I", year: "2025", subject: "Mathematics", type: "Official University Paper", questionsCount: 10 },
+            { id: "pp2", title: "NRIU B.Tech R23 Sem-1 End Exam: Problem Solving & C Programming", year: "2025", subject: "C Programming", type: "Official University Paper", questionsCount: 10 },
+            { id: "pp3", title: "NIAT Qualifier & Mid-Module Assessment: Python & Logic", year: "2025", subject: "Python", type: "NIAT Benchmark Paper", questionsCount: 15 },
+            { id: "pp4", title: "NRIU B.Tech R23 Sem-2 Model Paper: Python for AI & Data Science", year: "2026", subject: "AI and ML", type: "Sample Model Paper", questionsCount: 15 },
+            { id: "pp5", title: "NIAT Full-Stack & SQL Readiness Assessment", year: "2026", subject: "NIAT Modules", type: "NIAT Benchmark Paper", questionsCount: 15 }
+        ];
+
+        const STUDY_MATERIALS = [
+            { id: "sm1", title: "Matrices, Eigenvalues & Cayley-Hamilton Complete Notes", subject: "Mathematics", category: "Official Notes", pages: 28, summary: "Detailed derivations, solved university problems, and quick theorem revision sheet." },
+            { id: "sm2", title: "Pointers, Dynamic Memory & Structures in C Handbook", subject: "C Programming", category: "Official Notes", pages: 34, summary: "Memory diagrams, stack vs heap allocation, and common segmentation fault fixes." },
+            { id: "sm3", title: "Pythonic Data Structures & Comprehensions Cheat Sheet", subject: "Python", category: "NIAT Guide", pages: 16, summary: "Time complexities of list/dict/set operations with clean code recipes." },
+            { id: "sm4", title: "Foundations of Generative AI, LLMs & RAG Architecture", subject: "AI and ML", category: "Supplementary", pages: 22, summary: "Transformer intuition, tokenization, embeddings, and vector search explained." },
+            { id: "sm5", title: "SQL Joins, Aggregations & Window Functions Workbook", subject: "NIAT Modules", category: "NIAT Guide", pages: 19, summary: "25 real-world relational queries with schema diagrams." },
+            { id: "sm6", title: "Quantitative Aptitude & Logical Reasoning Formula Book", subject: "Aptitude", category: "Placement Prep", pages: 40, summary: "Shortcuts for percentages, time-speed-distance, permutations, and probability." }
+        ];
+
+        // ============================================================================
+        // 5. ROBUST LOCALSTORAGE MANAGER WITH VALIDATION & CORRUPTION RECOVERY
+        // ============================================================================
+        const StorageManager = {
+            KEY: "NRI_EXAMVERSE_DATA_V1",
+
+            getDefaultState() {
+                return {
+                    profile: {
+                        name: "Kola Santhosh",
+                        rollNo: "25NRI1A4201",
+                        course: "B.Tech CSE (AI & ML)",
+                        year: "1st Year",
+                        semester: "Semester 2",
+                        university: "NRI University",
+                        location: "Pothavareppadu, Vijayawada",
+                        partner: "NIAT (NxtWave)",
+                        email: "kola.santhosh@nriit.edu.in",
+                        targetCgpa: "9.2"
+                    },
+                    examAttempts: [
+                        {
+                            id: "EX-DEMO-01",
+                            subject: "Python",
+                            title: "Python Foundations Assessment",
+                            date: "2026-11-15 10:30 AM",
+                            score: 12,
+                            total: 15,
+                            percentage: 80,
+                            correct: 12,
+                            incorrect: 2,
+                            unanswered: 1,
+                            timeTakenSec: 640
+                        },
+                        {
+                            id: "EX-DEMO-02",
+                            subject: "C Programming",
+                            title: "C Pointers & Memory Mid-Term",
+                            date: "2026-11-18 02:15 PM",
+                            score: 11,
+                            total: 15,
+                            percentage: 73,
+                            correct: 11,
+                            incorrect: 3,
+                            unanswered: 1,
+                            timeTakenSec: 780
+                        }
+                    ],
+                    quizHistory: [
+                        {
+                            id: "QZ-101",
+                            subject: "AI and ML",
+                            mode: "Practice Mode",
+                            date: "2026-11-20",
+                            score: 13,
+                            total: 15,
+                            percentage: 87
+                        }
+                    ],
+                    assignments: [
+                        {
+                            id: "ASG-01",
+                            title: "Implement Matrix Multiplication & Eigenvalue Approximation",
+                            subject: "Engineering Mathematics",
+                            deadline: "2026-11-28",
+                            description: "Write a clean report and Python/C implementation demonstrating matrix operations and Cayley-Hamilton verification.",
+                            status: "Pending",
+                            submittedText: "",
+                            attachedFileName: "",
+                            submittedAt: ""
+                        },
+                        {
+                            id: "ASG-02",
+                            title: "Dynamic Student Record System using C Structures & Pointers",
+                            subject: "C Programming",
+                            deadline: "2026-11-22",
+                            description: "Build a menu-driven C program using malloc/calloc to store and search student academic records.",
+                            status: "Submitted",
+                            submittedText: "Implemented using struct Student with dynamic array resizing via realloc() and binary file persistence.",
+                            attachedFileName: "santhosh_c_records.pdf",
+                            submittedAt: "2026-11-21 04:45 PM"
+                        },
+                        {
+                            id: "ASG-03",
+                            title: "Prompt Engineering & RAG Workflow Case Study",
+                            subject: "NIAT Generative AI",
+                            deadline: "2026-12-05",
+                            description: "Design a multi-step prompt template and document chunking strategy for an academic Q&A assistant.",
+                            status: "Pending",
+                            submittedText: "",
+                            attachedFileName: "",
+                            submittedAt: ""
+                        }
+                    ],
+                    bookmarks: ["sm1", "sm3"],
+                    niatProgress: {},
+                    settings: {
+                        examDurationMins: 15,
+                        soundEffects: true,
+                        showExplanationsImmediately: true
+                    }
+                };
+            },
+
+            load() {
+                try {
+                    const raw = localStorage.getItem(this.KEY);
+                    if (!raw) {
+                        const initial = this.getDefaultState();
+                        this.save(initial);
+                        return initial;
+                    }
+                    const parsed = JSON.parse(raw);
+                    // Validate schema integrity
+                    if (typeof parsed !== "object" || parsed === null || !parsed.profile || !Array.isArray(parsed.examAttempts)) {
+                        throw new Error("Corrupted state structure");
+                    }
+                    const def = this.getDefaultState();
+                    return {
+                        ...def,
+                        ...parsed,
+                        profile: { ...def.profile, ...(parsed.profile || {}) },
+                        settings: { ...def.settings, ...(parsed.settings || {}) },
+                        examAttempts: Array.isArray(parsed.examAttempts) ? parsed.examAttempts : def.examAttempts,
+                        quizHistory: Array.isArray(parsed.quizHistory) ? parsed.quizHistory : def.quizHistory,
+                        assignments: Array.isArray(parsed.assignments) ? parsed.assignments : def.assignments,
+                        bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : def.bookmarks
+                    };
+                } catch (err) {
+                    console.warn("NRI ExamVerse: LocalStorage data missing or corrupted. Restoring safe defaults.", err);
+                    const fallback = this.getDefaultState();
+                    this.save(fallback);
+                    return fallback;
+                }
+            },
+
+            save(state) {
+                try {
+                    localStorage.setItem(this.KEY, JSON.stringify(state));
+                } catch (err) {
+                    console.error("Failed to save to LocalStorage:", err);
+                }
+            },
+
+            reset() {
+                const fresh = this.getDefaultState();
+                this.save(fresh);
+                return fresh;
+            }
+        };
+
+        // ============================================================================
+        // 6. UI HELPERS (MODALS, TOASTS, SIDEBAR)
+        // ============================================================================
+        const UI = {
+            toggleSidebar(open) {
+                const sb = document.getElementById("sidebar");
+                const bd = document.getElementById("sidebar-backdrop");
+                if (open) {
+                    sb.classList.remove("-translate-x-full");
+                    bd.classList.remove("hidden");
+                } else {
+                    sb.classList.add("-translate-x-full");
+                    bd.classList.add("hidden");
+                }
+            },
+
+            toast(message, type = "info") {
+                const container = document.getElementById("toast-container");
+                const colors = {
+                    success: "border-emerald-500/40 bg-emerald-950/90 text-emerald-200",
+                    error: "border-rose-500/40 bg-rose-950/90 text-rose-200",
+                    warning: "border-amber-500/40 bg-amber-950/90 text-amber-200",
+                    info: "border-indigo-500/40 bg-navy-900/95 text-indigo-200"
+                };
+                const el = document.createElement("div");
+                el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl backdrop-blur-md text-xs font-medium flex items-center gap-2.5 animate-fade-in ${colors[type] || colors.info}`;
+                el.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle-2' : type === 'warning' ? 'alert-triangle' : 'info'}" class="w-4 h-4 shrink-0"></i><span>${message}</span>`;
+                container.appendChild(el);
+                lucide.createIcons();
+                setTimeout(() => {
+                    el.style.opacity = "0";
+                    el.style.transition = "opacity 0.3s ease";
+                    setTimeout(() => el.remove(), 300);
+                }, 3200);
+            },
+
+            showModal({ title, bodyHtml, actions = [] }) {
+                document.getElementById("modal-title").innerHTML = title;
+                document.getElementById("modal-body").innerHTML = bodyHtml;
+                const actionsEl = document.getElementById("modal-actions");
+                actionsEl.innerHTML = "";
+                actions.forEach(act => {
+                    const btn = document.createElement("button");
+                    btn.className = act.className || "px-4 py-2 rounded-xl text-xs font-semibold bg-navy-700 hover:bg-navy-600 text-white";
+                    btn.textContent = act.label;
+                    btn.onclick = () => {
+                        if (act.closeOnClick !== false) this.closeModal();
+                        if (act.onClick) act.onClick();
+                    };
+                    actionsEl.appendChild(btn);
+                });
+                const overlay = document.getElementById("modal-overlay");
+                overlay.classList.remove("hidden");
+                overlay.classList.add("flex");
+                lucide.createIcons();
+            },
+
+            closeModal() {
+                const overlay = document.getElementById("modal-overlay");
+                overlay.classList.add("hidden");
+                overlay.classList.remove("flex");
+            },
+
+            formatTime(seconds) {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+            }
+        };
+
+        // ============================================================================
+        // 7. MAIN APPLICATION CONTROLLER (14 MODULES)
+        // ============================================================================
+        const App = {
+            state: StorageManager.load(),
+            currentModule: "dashboard",
+
+            // Examination Engine Runtime State
+            examRuntime: {
+                active: false,
+                subject: "Python",
+                title: "Official Semester Practice Exam",
+                questions: [],
+                currentIndex: 0,
+                answers: {},      // { qIndex: optionIndex }
+                markedReview: {}, // { qIndex: boolean }
+                timeLeft: 900,
+                totalDuration: 900,
+                timerId: null
+            },
+
+            // Quiz Runtime State
+            quizRuntime: {
+                active: false,
+                subject: "Python",
+                practiceMode: true,
+                questions: [],
+                currentIndex: 0,
+                answers: {},
+                timeLeft: 600,
+                timerId: null,
+                finished: false
+            },
+
+            // Coding Practice Runtime State
+            codingRuntime: {
+                challengeId: "code-1",
+                language: "Python",
+                userCode: {}
+            },
+
+            // JARVIS Chat History
+            jarvisMessages: [
+                { sender: "jarvis", text: "Greetings Kola Santhosh! I am JARVIS, your NRI University & NIAT AI Academic Assistant. Ask me about B.Tech CSE (AI & ML) subjects, Python/C concepts, exam strategies, or NIAT roadmaps." }
+            ],
+
+            modulesList: [
+                { id: "dashboard", label: "Dashboard", icon: "layout-dashboard", subtitle: "Academic overview, analytics & quick actions" },
+                { id: "profile", label: "Student Profile", icon: "user-circle", subtitle: "NRI University & NIAT student credentials" },
+                { id: "subjects", label: "B.Tech Subjects", icon: "book-open", subtitle: "1st Year CSE (AI & ML) official & supplementary syllabus" },
+                { id: "niat", label: "NIAT Learning", icon: "cpu", subtitle: "NxtWave industry-aligned skill tracks & progress" },
+                { id: "examination", label: "Online Examination", icon: "file-check-2", subtitle: "Proctored-style CBT examination engine" },
+                { id: "mocktests", label: "Mock Tests", icon: "layers", subtitle: "Subject & difficulty-tiered practice tests" },
+                { id: "quiz", label: "Quiz Center", icon: "zap", subtitle: "15-question randomized timed quizzes with instant feedback" },
+                { id: "assignments", label: "Assignments", icon: "clipboard-list", subtitle: "Coursework submissions, file uploads & deadlines" },
+                { id: "coding", label: "Coding Practice", icon: "code-2", subtitle: "Multi-language algorithm challenges & test cases" },
+                { id: "papers", label: "Previous Papers", icon: "archive", subtitle: "NRI University & NIAT archive papers" },
+                { id: "materials", label: "Study Materials", icon: "library", subtitle: "Curated notes, cheat sheets & bookmarks" },
+                { id: "results", label: "Results & Analytics", icon: "bar-chart-3", subtitle: "Comprehensive scorecards & subject mastery" },
+                { id: "jarvis", label: "JARVIS AI Assistant", icon: "bot", subtitle: "24/7 academic doubt solver & study planner" },
+                { id: "settings", label: "Settings", icon: "settings", subtitle: "Preferences, LocalStorage backup & demo reset" }
+            ],
+
+            init() {
+                this.renderSidebar();
+                this.navigate("dashboard");
+            },
+
+            renderSidebar() {
+                const nav = document.getElementById("sidebar-nav");
+                nav.innerHTML = this.modulesList.map(m => {
+                    const active = this.currentModule === m.id;
+                    return `
+                        <button onclick="App.navigate('${m.id}')"
+                            class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                                active
+                                ? "bg-gradient-to-r from-purple-600/30 to-blue-600/20 text-white border border-purple-500/40 shadow-sm"
+                                : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+                            }">
+                            <i data-lucide="${m.icon}" class="w-4 h-4 ${active ? 'text-purple-400' : 'text-slate-400'}"></i>
+                            <span class="truncate">${m.label}</span>
+                            ${m.id === 'examination' ? '<span class="ml-auto px-1.5 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">CBT</span>' : ''}
+                        </button>
+                    `;
+                }).join("");
+                document.getElementById("sidebar-student-name").textContent = this.state.profile.name;
+                lucide.createIcons();
+            },
+
+            navigate(moduleId) {
+                // Warn if leaving an active exam
+                if (this.examRuntime.active && moduleId !== "examination") {
+                    UI.showModal({
+                        title: `<i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400"></i> Active Examination in Progress`,
+                        bodyHtml: "You currently have an active examination timer running. Navigating away will pause your view, though the timer continues. Do you want to leave the exam screen?",
+                        actions: [
+                            { label: "Stay in Exam", className: "px-4 py-2 rounded-xl text-xs font-semibold gradient-btn text-white" },
+                            { label: "Leave Screen", className: "px-4 py-2 rounded-xl text-xs font-semibold bg-navy-700 text-slate-200", onClick: () => this._performNavigation(moduleId) }
+                        ]
+                    });
+                    return;
+                }
+                this._performNavigation(moduleId);
+            },
+
+            _performNavigation(moduleId) {
+                this.currentModule = moduleId;
+                UI.toggleSidebar(false);
+                const meta = this.modulesList.find(m => m.id === moduleId) || this.modulesList[0];
+                document.getElementById("page-title").textContent = meta.label;
+                document.getElementById("page-subtitle").textContent = meta.subtitle;
+                this.renderSidebar();
+
+                const container = document.getElementById("app-content");
+                container.classList.remove("animate-fade-in");
+                void container.offsetWidth; // trigger reflow
+                container.classList.add("animate-fade-in");
+
+                const renderers = {
+                    dashboard: () => this.renderDashboard(container),
+                    profile: () => this.renderProfile(container),
+                    subjects: () => this.renderSubjects(container),
+                    niat: () => this.renderNiat(container),
+                    examination: () => this.renderExamination(container),
+                    mocktests: () => this.renderMockTests(container),
+                    quiz: () => this.renderQuizCenter(container),
+                    assignments: () => this.renderAssignments(container),
+                    coding: () => this.renderCodingPractice(container),
+                    papers: () => this.renderPreviousPapers(container),
+                    materials: () => this.renderStudyMaterials(container),
+                    results: () => this.renderResults(container),
+                    jarvis: () => this.renderJarvis(container),
+                    settings: () => this.renderSettings(container)
+                };
+
+                (renderers[moduleId] || renderers.dashboard)();
+                lucide.createIcons();
+            },
+
+            // ========================================================================
+            // MODULE 1: DASHBOARD
+            // ========================================================================
+            renderDashboard(container) {
+                const p = this.state.profile;
+                const attempts = this.state.examAttempts;
+                const avgScore = attempts.length
+                    ? Math.round(attempts.reduce((acc, a) => acc + a.percentage, 0) / attempts.length)
+                    : 0;
+                const pendingAsg = this.state.assignments.filter(a => a.status === "Pending").length;
+                const totalQuestions = Object.values(QUESTION_BANK).reduce((sum, arr) => sum + arr.length, 0);
+
+                container.innerHTML = `
+                    <!-- Hero Welcome Banner -->
+                    <div class="glass-card rounded-2xl p-6 mb-6 relative overflow-hidden">
+                        <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-purple-600/20 blur-3xl pointer-events-none"></div>
+                        <div class="absolute right-24 -bottom-16 w-56 h-56 rounded-full bg-blue-600/20 blur-3xl pointer-events-none"></div>
+                        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-medium mb-3">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>${p.university} • ${p.location}</span>
+                                </div>
+                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+                                    Welcome back, <span class="gradient-text">${p.name}</span>!
+                                </h1>
+                                <p class="text-slate-300 text-sm max-w-2xl">
+                                    ${p.course} (${p.year}) • Integrated Industry Track with <strong class="text-purple-300">${p.partner}</strong>.
+                                    Your question bank is loaded with <strong class="text-blue-300">${totalQuestions} verified MCQs</strong> across 7 subjects.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-3 shrink-0">
+                                <button onclick="App.navigate('examination')" class="px-5 py-3 rounded-xl gradient-btn text-white text-xs font-bold flex items-center gap-2">
+                                    <i data-lucide="play-circle" class="w-4 h-4"></i>
+                                    <span>Start Online Exam</span>
+                                </button>
+                                <button onclick="App.navigate('quiz')" class="px-5 py-3 rounded-xl bg-navy-800 hover:bg-navy-700 border border-indigo-500/30 text-slate-100 text-xs font-bold flex items-center gap-2 transition">
+                                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                                    <span>Quick 15-Q Quiz</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Metrics Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="glass-card rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-medium text-slate-400">Exams Completed</span>
+                                <div class="p-2 rounded-lg bg-purple-500/20 text-purple-400"><i data-lucide="award" class="w-4 h-4"></i></div>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${attempts.length}</div>
+                            <p class="text-xs text-emerald-400 mt-1">Persisted in LocalStorage</p>
+                        </div>
+                        <div class="glass-card rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-medium text-slate-400">Average Exam Score</span>
+                                <div class="p-2 rounded-lg bg-blue-500/20 text-blue-400"><i data-lucide="trending-up" class="w-4 h-4"></i></div>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${avgScore}%</div>
+                            <p class="text-xs text-slate-400 mt-1">Target CGPA: ${p.targetCgpa}</p>
+                        </div>
+                        <div class="glass-card rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-medium text-slate-400">Pending Assignments</span>
+                                <div class="p-2 rounded-lg bg-amber-500/20 text-amber-400"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${pendingAsg}</div>
+                            <p class="text-xs text-amber-300 mt-1 cursor-pointer hover:underline" onclick="App.navigate('assignments')">View coursework →</p>
+                        </div>
+                        <div class="glass-card rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-medium text-slate-400">NIAT Skill Tracks</span>
+                                <div class="p-2 rounded-lg bg-cyan-500/20 text-cyan-400"><i data-lucide="cpu" class="w-4 h-4"></i></div>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">10 Active</div>
+                            <p class="text-xs text-cyan-300 mt-1 cursor-pointer hover:underline" onclick="App.navigate('niat')">Continue learning →</p>
+                        </div>
+                    </div>
+
+                    <!-- Two Column Overview: Recent Attempts & Quick Launchers -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Recent Exam History -->
+                        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-white flex items-center gap-2">
+                                    <i data-lucide="history" class="w-4 h-4 text-purple-400"></i>
+                                    <span>Recent Examination & Quiz Activity</span>
+                                </h3>
+                                <button onclick="App.navigate('results')" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">Full Analytics →</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-indigo-500/20 text-slate-400">
+                                            <th class="pb-3 font-semibold">Assessment</th>
+                                            <th class="pb-3 font-semibold">Subject</th>
+                                            <th class="pb-3 font-semibold">Score</th>
+                                            <th class="pb-3 font-semibold">Percentage</th>
+                                            <th class="pb-3 font-semibold">Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-indigo-500/10">
+                                        ${attempts.slice().reverse().slice(0, 5).map(a => `
+                                            <tr class="hover:bg-white/5 transition">
+                                                <td class="py-3 font-medium text-white">${a.title}</td>
+                                                <td class="py-3 text-indigo-300">${a.subject}</td>
+                                                <td class="py-3 font-mono text-slate-200">${a.score}/${a.total}</td>
+                                                <td class="py-3">
+                                                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${a.percentage >= 75 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                                                        ${a.percentage}%
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 text-slate-400">${a.date}</td>
+                                            </tr>
+                                        `).join("")}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Student Quick Card & Study Roadmap -->
+                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="compass" class="w-4 h-4 text-blue-400"></i>
+                                    <span>Quick Module Jump</span>
+                                </h3>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <button onclick="App.navigate('subjects')" class="p-3 rounded-xl bg-navy-800/80 hover:bg-navy-700 border border-indigo-500/20 text-left transition">
+                                        <i data-lucide="book-open" class="w-4 h-4 text-purple-400 mb-1.5"></i>
+                                        <div class="text-xs font-semibold text-white">B.Tech Syllabus</div>
+                                        <div class="text-[10px] text-slate-400">Sem 1 & 2 Units</div>
+                                    </button>
+                                    <button onclick="App.navigate('coding')" class="p-3 rounded-xl bg-navy-800/80 hover:bg-navy-700 border border-indigo-500/20 text-left transition">
+                                        <i data-lucide="code-2" class="w-4 h-4 text-cyan-400 mb-1.5"></i>
+                                        <div class="text-xs font-semibold text-white">Coding Lab</div>
+                                        <div class="text-[10px] text-slate-400">5 Languages</div>
+                                    </button>
+                                    <button onclick="App.navigate('mocktests')" class="p-3 rounded-xl bg-navy-800/80 hover:bg-navy-700 border border-indigo-500/20 text-left transition">
+                                        <i data-lucide="layers" class="w-4 h-4 text-emerald-400 mb-1.5"></i>
+                                        <div class="text-xs font-semibold text-white">Mock Tests</div>
+                                        <div class="text-[10px] text-slate-400">3 Difficulty Tiers</div>
+                                    </button>
+                                    <button onclick="App.navigate('materials')" class="p-3 rounded-xl bg-navy-800/80 hover:bg-navy-700 border border-indigo-500/20 text-left transition">
+                                        <i data-lucide="library" class="w-4 h-4 text-amber-400 mb-1.5"></i>
+                                        <div class="text-xs font-semibold text-white">Study Notes</div>
+                                        <div class="text-[10px] text-slate-400">${this.state.bookmarks.length} Bookmarked</div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-5 p-3.5 rounded-xl bg-indigo-950/70 border border-indigo-500/25 text-xs text-slate-300">
+                                <p class="font-semibold text-indigo-300 mb-1">💡 Frontend Architecture Note</p>
+                                All student records, quiz scores, and assignment submissions are saved locally in your browser via <code class="text-purple-300">localStorage</code>.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ========================================================================
+            // MODULE 2: STUDENT PROFILE
+            // ========================================================================
+            renderProfile(container) {
+                const p = this.state.profile;
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Profile Card -->
+                        <div class="glass-card rounded-2xl p-6 text-center">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-500 mx-auto flex items-center justify-center text-3xl font-extrabold text-white shadow-xl shadow-purple-500/25 mb-4">
+                                KS
+                            </div>
+                            <h2 class="text-xl font-bold text-white">${p.name}</h2>
+                            <p class="text-xs text-indigo-300 font-medium mt-1">${p.course}</p>
+                            <div class="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs">
+                                <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
+                                <span>Active 1st Year Scholar</span>
+                            </div>
+
+                            <div class="mt-6 pt-6 border-t border-indigo-500/15 text-left space-y-3 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">University:</span>
+                                    <span class="font-semibold text-white">${p.university}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Campus Location:</span>
+                                    <span class="font-semibold text-white">${p.location}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Learning Partner:</span>
+                                    <span class="font-semibold text-purple-300">${p.partner}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Academic Year:</span>
+                                    <span class="font-semibold text-white">${p.year} (${p.semester})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Editable Profile Form -->
+                        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-white mb-1">Academic & Personal Details</h3>
+                            <p class="text-xs text-slate-400 mb-6">Update your profile preferences. Changes persist automatically in LocalStorage.</p>
+
+                            <form id="profile-form" onsubmit="App.saveProfile(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Full Name</label>
+                                    <input type="text" name="name" value="${p.name}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">University Roll Number</label>
+                                    <input type="text" name="rollNo" value="${p.rollNo}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Course / Branch</label>
+                                    <input type="text" name="course" value="${p.course}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Year & Semester</label>
+                                    <input type="text" name="year" value="${p.year}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">University</label>
+                                    <input type="text" name="university" value="${p.university}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Location</label>
+                                    <input type="text" name="location" value="${p.location}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Learning Partner</label>
+                                    <input type="text" name="partner" value="${p.partner}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Target CGPA</label>
+                                    <input type="text" name="targetCgpa" value="${p.targetCgpa}" required class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900/90 border border-indigo-500/30 text-white focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div class="sm:col-span-2 flex justify-end pt-2">
+                                    <button type="submit" class="px-6 py-2.5 rounded-xl gradient-btn text-white font-bold">
+                                        Save Profile Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+
+            saveProfile(e) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                for (const [k, v] of fd.entries()) {
+                    this.state.profile[k] = v.trim();
+                }
+                StorageManager.save(this.state);
+                this.renderSidebar();
+                UI.toast("Student profile saved to LocalStorage!", "success");
+            },
+
+            // ========================================================================
+            // MODULE 3: B.TECH SUBJECTS (VERIFIED OFFICIAL VS SUPPLEMENTARY)
+            // ========================================================================
+            renderSubjects(container) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-white text-base">B.Tech CSE (AI & ML) — 1st Year Curriculum</h3>
+                            <p class="text-xs text-slate-400">Clearly separating <span class="text-emerald-400 font-semibold">Verified Official University Syllabus</span> from <span class="text-purple-400 font-semibold">NIAT & Supplementary Tracks</span>.</p>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl bg-navy-800 border border-indigo-500/30 text-xs text-indigo-300 font-semibold shrink-0">
+                            NRI University R23 Regulation
+                        </span>
+                    </div>
+
+                    <div class="space-y-5">
+                        ${BTECH_SYLLABUS.map(sub => `
+                            <div class="glass-card rounded-2xl p-6">
+                                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-indigo-500/15">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2.5 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono text-xs font-bold">${sub.code}</span>
+                                            <span class="text-xs text-slate-400">${sub.semester} • ${sub.credits} Credits</span>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-white mt-1">${sub.name}</h4>
+                                    </div>
+                                    <button onclick="App.launchSubjectExam('${sub.name.includes('Python') ? 'Python' : sub.name.includes('C ') ? 'C Programming' : sub.name.includes('Math') ? 'Mathematics' : 'AI and ML'}')"
+                                        class="px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 border border-purple-500/30 text-purple-200 text-xs font-semibold transition">
+                                        Practice Subject MCQs →
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                                    <!-- Verified Official Units -->
+                                    <div class="lg:col-span-2 space-y-3">
+                                        <div class="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                            <span>Verified Official Syllabus Units</span>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            ${sub.officialUnits.map(u => `
+                                                <div class="p-3.5 rounded-xl bg-navy-900/70 border border-emerald-500/20">
+                                                    <p class="font-semibold text-white text-xs mb-2">${u.unit}</p>
+                                                    <ul class="space-y-1 text-xs text-slate-300 list-disc list-inside">
+                                                        ${u.topics.map(t => `<li>${t}</li>`).join("")}
+                                                    </ul>
+                                                </div>
+                                            `).join("")}
+                                        </div>
+                                    </div>
+
+                                    <!-- Supplementary & NIAT Content -->
+                                    <div class="p-4 rounded-xl bg-purple-950/25 border border-purple-500/25">
+                                        <div class="flex items-center gap-2 text-xs font-bold text-purple-300 uppercase tracking-wider mb-3">
+                                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                            <span>Sample & Supplementary Enrichment</span>
+                                        </div>
+                                        <ul class="space-y-2 text-xs text-slate-300">
+                                            ${sub.supplementary.map(s => `
+                                                <li class="flex items-start gap-2">
+                                                    <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5"></i>
+                                                    <span>${s}</span>
+                                                </li>
+                                            `).join("")}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                `;
+            },
+
+            // ========================================================================
+            // MODULE 4: NIAT LEARNING
+            // ========================================================================
+            renderNiat(container) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div>
+                            <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold">NIAT × NxtWave Industry Curriculum</span>
+                            <h3 class="text-xl font-bold text-white mt-2">Specialized Skill Tracks for B.Tech CSE (AI & ML)</h3>
+                            <p class="text-xs text-slate-400 mt-1">Hands-on industry modules integrated alongside your NRI University degree.</p>
+                        </div>
+                        <button onclick="App.launchSubjectExam('NIAT Modules')" class="px-5 py-2.5 rounded-xl gradient-btn text-white text-xs font-bold shrink-0">
+                            Take NIAT Assessment
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        ${NIAT_TRACKS.map(tr => {
+                            const extra = this.state.niatProgress[tr.id] || 0;
+                            const done = Math.min(tr.modules, tr.completed + extra);
+                            const pct = Math.round((done / tr.modules) * 100);
+                            return `
+                                <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span class="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[11px] font-semibold">${tr.level}</span>
+                                            <span class="text-xs font-mono font-bold text-cyan-300">${pct}%</span>
+                                        </div>
+                                        <h4 class="text-base font-bold text-white mb-1.5">${tr.category}</h4>
+                                        <p class="text-xs text-slate-400 leading-relaxed mb-4">${tr.desc}</p>
+                                    </div>
+                                    <div>
+                                        <div class="w-full h-2 rounded-full bg-navy-900 overflow-hidden mb-3">
+                                            <div class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-slate-400">${done} / ${tr.modules} Units</span>
+                                            <button onclick="App.advanceNiatTrack('${tr.id}')" class="text-purple-300 hover:text-white font-semibold">
+                                                ${pct === 100 ? 'Completed ✓' : '+ Log Unit Progress'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                `;
+            },
+
+            advanceNiatTrack(trackId) {
+                this.state.niatProgress[trackId] = (this.state.niatProgress[trackId] || 0) + 1;
+                StorageManager.save(this.state);
+                UI.toast("NIAT learning progress updated!", "success");
+                this.renderNiat(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            // ========================================================================
+            // MODULE 5: ONLINE EXAMINATION (FULL CBT INTERFACE)
+            // ========================================================================
+            launchSubjectExam(subject, difficulty = "All", customTitle = null) {
+                let pool = QUESTION_BANK[subject] || QUESTION_BANK["Python"];
+                if (difficulty !== "All") {
+                    const filtered = pool.filter(q => q.diff === difficulty);
+                    if (filtered.length > 0) pool = filtered;
+                }
+                const durationMins = this.state.settings.examDurationMins || 15;
+                this.examRuntime = {
+                    active: true,
+                    subject,
+                    title: customTitle || `${subject} Comprehensive CBT Exam`,
+                    questions: pool,
+                    currentIndex: 0,
+                    answers: {},
+                    markedReview: {},
+                    timeLeft: durationMins * 60,
+                    totalDuration: durationMins * 60,
+                    timerId: null
+                };
+                this.navigate("examination");
+                this.startExamTimer();
+            },
+
+            startExamTimer() {
+                if (this.examRuntime.timerId) clearInterval(this.examRuntime.timerId);
+                this.examRuntime.timerId = setInterval(() => {
+                    if (!this.examRuntime.active) {
+                        clearInterval(this.examRuntime.timerId);
+                        return;
+                    }
+                    this.examRuntime.timeLeft--;
+                    const timerEl = document.getElementById("exam-timer-display");
+                    if (timerEl) {
+                        timerEl.textContent = UI.formatTime(this.examRuntime.timeLeft);
+                        if (this.examRuntime.timeLeft <= 60) {
+                            timerEl.classList.add("text-rose-400", "animate-pulse");
+                        }
+                    }
+                    if (this.examRuntime.timeLeft <= 0) {
+                        clearInterval(this.examRuntime.timerId);
+                        UI.toast("Time expired! Automatically submitting examination...", "warning");
+                        this.submitExamination(true);
+                    }
+                }, 1000);
+            },
+
+            renderExamination(container) {
+                const ex = this.examRuntime;
+
+                // Pre-Exam Instructions & Subject Selection Lobby
+                if (!ex.active) {
+                    const subjects = Object.keys(QUESTION_BANK);
+                    container.innerHTML = `
+                        <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 sm:p-8">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="p-3 rounded-xl bg-purple-600/25 text-purple-300 border border-purple-500/30">
+                                    <i data-lucide="file-check-2" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-extrabold text-white">NRI ExamVerse — Online Examination Portal</h3>
+                                    <p class="text-xs text-slate-400">Computer-Based Test (CBT) Simulation Environment</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 mb-6">
+                                <strong>Demo Integrity Disclaimer:</strong> This CBT engine runs entirely client-side using JavaScript timers and LocalStorage. While it models real exam navigation, palettes, and auto-submission, it is designed strictly for student practice and demo evaluation.
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="p-5 rounded-xl bg-navy-900/80 border border-indigo-500/20">
+                                    <h4 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
+                                        <i data-lucide="list-checks" class="w-4 h-4 text-blue-400"></i>
+                                        <span>Examination Instructions</span>
+                                    </h4>
+                                    <ul class="space-y-2 text-xs text-slate-300 list-disc list-inside leading-relaxed">
+                                        <li>Each standard subject examination contains <strong>15 multiple-choice questions</strong>.</li>
+                                        <li>Each correct answer awards <strong>+1 mark</strong>. No negative marking in practice CBT.</li>
+                                        <li>Use the <strong>Question Palette</strong> to jump directly to any question number.</li>
+                                        <li>Use <strong>Mark for Review</strong> to flag uncertain questions before final submission.</li>
+                                        <li>The exam <strong>automatically submits</strong> when the countdown timer reaches 00:00.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="p-5 rounded-xl bg-navy-900/80 border border-indigo-500/20 flex flex-col justify-between">
+                                    <div>
+                                        <h4 class="font-bold text-white text-sm mb-3">Configure & Launch Exam</h4>
+                                        <label class="block text-xs text-slate-400 mb-1.5">Select Subject Paper</label>
+                                        <select id="exam-subject-select" class="w-full px-3.5 py-2.5 rounded-xl bg-navy-800 border border-indigo-500/30 text-white text-xs mb-4">
+                                            ${subjects.map(s => `<option value="${s}">${s} (${QUESTION_BANK[s].length} Questions)</option>`).join("")}
+                                        </select>
+                                        <div class="flex items-center justify-between text-xs text-slate-300 bg-navy-800/60 p-3 rounded-xl">
+                                            <span>Duration: <strong>${this.state.settings.examDurationMins} Minutes</strong></span>
+                                            <span>Candidate: <strong>${this.state.profile.name}</strong></span>
+                                        </div>
+                                    </div>
+                                    <button onclick="App.launchSubjectExam(document.getElementById('exam-subject-select').value)"
+                                        class="mt-5 w-full py-3 rounded-xl gradient-btn text-white text-xs font-bold flex items-center justify-center gap-2">
+                                        <i data-lucide="play" class="w-4 h-4"></i>
+                                        <span>Start Examination Now</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Active CBT Examination Interface
+                const qObj = ex.questions[ex.currentIndex];
+                const selectedOpt = ex.answers[ex.currentIndex];
+                const isMarked = !!ex.markedReview[ex.currentIndex];
+                const answeredCount = Object.keys(ex.answers).length;
+                const reviewCount = Object.values(ex.markedReview).filter(Boolean).length;
+                const unansweredCount = ex.questions.length - answeredCount;
+
+                container.innerHTML = `
+                    <!-- Top Exam Status Bar -->
+                    <div class="glass-card rounded-2xl p-4 mb-5 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <span class="text-[11px] uppercase tracking-wider text-purple-300 font-bold">${ex.subject}</span>
+                            <h3 class="text-base font-bold text-white">${ex.title}</h3>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="px-4 py-2 rounded-xl bg-navy-900 border border-indigo-500/30 flex items-center gap-2">
+                                <i data-lucide="timer" class="w-4 h-4 text-cyan-400"></i>
+                                <span id="exam-timer-display" class="font-mono text-base font-bold text-white">${UI.formatTime(ex.timeLeft)}</span>
+                            </div>
+                            <button onclick="App.confirmExamSubmit()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 transition">
+                                Submit Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Exam Grid: Question Area + Palette -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left 2 Cols: Active Question -->
+                        <div class="lg:col-span-2 glass-card rounded-2xl p-6 flex flex-col justify-between min-h-[420px]">
+                            <div>
+                                <div class="flex items-center justify-between pb-4 mb-5 border-b border-indigo-500/15">
+                                    <span class="text-xs font-bold text-indigo-300">Question ${ex.currentIndex + 1} of ${ex.questions.length}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-0.5 rounded-md bg-navy-800 text-slate-300 text-[11px]">${qObj.diff}</span>
+                                        ${isMarked ? '<span class="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[11px] font-semibold">Marked for Review</span>' : ''}
+                                    </div>
+                                </div>
+
+                                <p class="text-base sm:text-lg font-semibold text-white leading-relaxed mb-6">${qObj.q}</p>
+
+                                <div class="space-y-3">
+                                    ${qObj.opts.map((opt, idx) => {
+                                        const isSelected = selectedOpt === idx;
+                                        return `
+                                            <button onclick="App.selectExamOption(${idx})"
+                                                class="w-full text-left p-4 rounded-xl border transition flex items-center gap-3.5 ${
+                                                    isSelected
+                                                    ? "bg-purple-600/25 border-purple-400 text-white shadow-md"
+                                                    : "bg-navy-900/70 border-indigo-500/20 text-slate-300 hover:bg-navy-800 hover:border-indigo-400/40"
+                                                }">
+                                                <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                                                    isSelected ? "bg-purple-500 text-white" : "bg-navy-800 text-slate-400"
+                                                }">
+                                                    ${String.fromCharCode(65 + idx)}
+                                                </span>
+                                                <span class="text-sm">${opt}</span>
+                                            </button>
+                                        `;
+                                    }).join("")}
+                                </div>
+                            </div>
+
+                            <!-- Bottom Controls -->
+                            <div class="pt-6 mt-6 border-t border-indigo-500/15 flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="App.toggleMarkReview()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+                                        ${isMarked ? "Unmark Review" : "Mark for Review"}
+                                    </button>
+                                    <button onclick="App.clearExamAnswer()" class="px-3.5 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 border border-slate-600/40 text-slate-300 text-xs font-semibold">
+                                        Clear Answer
+                                    </button>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="App.jumpExamQuestion(${ex.currentIndex - 1})" ${ex.currentIndex === 0 ? "disabled" : ""}
+                                        class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 disabled:opacity-40 text-white text-xs font-semibold">
+                                        ← Previous
+                                    </button>
+                                    <button onclick="App.jumpExamQuestion(${ex.currentIndex + 1})" ${ex.currentIndex === ex.questions.length - 1 ? "disabled" : ""}
+                                        class="px-4 py-2 rounded-xl gradient-btn disabled:opacity-40 text-white text-xs font-semibold">
+                                        Save & Next →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Col: Question Palette & Counters -->
+                        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-white text-sm mb-3">Question Palette</h4>
+                                <div class="grid grid-cols-5 gap-2 mb-5">
+                                    ${ex.questions.map((_, i) => {
+                                        const ans = ex.answers[i] !== undefined;
+                                        const rev = !!ex.markedReview[i];
+                                        const curr = ex.currentIndex === i;
+                                        let style = "bg-navy-900 border-indigo-500/25 text-slate-400";
+                                        if (rev && ans) style = "bg-purple-600/40 border-amber-400 text-white";
+                                        else if (rev) style = "bg-amber-500/25 border-amber-400 text-amber-200";
+                                        else if (ans) style = "bg-emerald-600/35 border-emerald-400 text-emerald-200";
+
+                                        return `
+                                            <button onclick="App.jumpExamQuestion(${i})"
+                                                class="h-10 rounded-xl border text-xs font-bold transition ${style} ${curr ? 'ring-2 ring-white' : ''}">
+                                                ${i + 1}
+                                            </button>
+                                        `;
+                                    }).join("")}
+                                </div>
+
+                                <div class="space-y-2 text-xs border-t border-indigo-500/15 pt-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="flex items-center gap-2 text-slate-300"><span class="w-3 h-3 rounded bg-emerald-500/50 border border-emerald-400"></span> Answered</span>
+                                        <span class="font-bold text-white">${answeredCount}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="flex items-center gap-2 text-slate-300"><span class="w-3 h-3 rounded bg-navy-900 border border-indigo-500/40"></span> Unanswered</span>
+                                        <span class="font-bold text-white">${unansweredCount}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="flex items-center gap-2 text-slate-300"><span class="w-3 h-3 rounded bg-amber-500/30 border border-amber-400"></span> Marked for Review</span>
+                                        <span class="font-bold text-white">${reviewCount}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="App.confirmExamSubmit()" class="mt-6 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+                                Finish & Submit Examination
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            selectExamOption(optIdx) {
+                this.examRuntime.answers[this.examRuntime.currentIndex] = optIdx;
+                this.renderExamination(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            clearExamAnswer() {
+                delete this.examRuntime.answers[this.examRuntime.currentIndex];
+                this.renderExamination(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            toggleMarkReview() {
+                const idx = this.examRuntime.currentIndex;
+                this.examRuntime.markedReview[idx] = !this.examRuntime.markedReview[idx];
+                this.renderExamination(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            jumpExamQuestion(idx) {
+                if (idx >= 0 && idx < this.examRuntime.questions.length) {
+                    this.examRuntime.currentIndex = idx;
+                    this.renderExamination(document.getElementById("app-content"));
+                    lucide.createIcons();
+                }
+            },
+
+            confirmExamSubmit() {
+                const ex = this.examRuntime;
+                const answered = Object.keys(ex.answers).length;
+                const unanswered = ex.questions.length - answered;
+                UI.showModal({
+                    title: `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> Submit Examination?`,
+                    bodyHtml: `
+                        <p class="mb-3">Are you sure you want to finalize and submit <strong>${ex.title}</strong>?</p>
+                        <div class="p-3.5 rounded-xl bg-navy-900 border border-indigo-500/25 space-y-1.5 text-xs">
+                            <div class="flex justify-between"><span>Total Questions:</span><strong>${ex.questions.length}</strong></div>
+                            <div class="flex justify-between text-emerald-400"><span>Answered:</span><strong>${answered}</strong></div>
+                            <div class="flex justify-between text-amber-400"><span>Unanswered:</span><strong>${unanswered}</strong></div>
+                        </div>
+                    `,
+                    actions: [
+                        { label: "Resume Exam", className: "px-4 py-2 rounded-xl text-xs font-semibold bg-navy-700 text-slate-200" },
+                        { label: "Confirm & Submit", className: "px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white", onClick: () => this.submitExamination(false) }
+                    ]
+                });
+            },
+
+            submitExamination(autoSubmitted = false) {
+                const ex = this.examRuntime;
+                if (ex.timerId) clearInterval(ex.timerId);
+
+                let correct = 0, incorrect = 0, unanswered = 0;
+                ex.questions.forEach((q, idx) => {
+                    const userAns = ex.answers[idx];
+                    if (userAns === undefined) unanswered++;
+                    else if (userAns === q.ans) correct++;
+                    else incorrect++;
+                });
+
+                const total = ex.questions.length;
+                const percentage = Math.round((correct / total) * 100);
+                const timeTakenSec = Math.max(1, ex.totalDuration - ex.timeLeft);
+
+                const record = {
+                    id: "EX-" + Date.now().toString().slice(-5),
+                    subject: ex.subject,
+                    title: ex.title,
+                    date: new Date().toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                    score: correct,
+                    total,
+                    percentage,
+                    correct,
+                    incorrect,
+                    unanswered,
+                    timeTakenSec
+                };
+
+                this.state.examAttempts.push(record);
+                StorageManager.save(this.state);
+                this.examRuntime.active = false;
+
+                UI.toast(autoSubmitted ? "Exam auto-submitted and graded!" : "Examination submitted successfully!", "success");
+                this.navigate("results");
+            },
+
+            // ========================================================================
+            // MODULE 6: MOCK TESTS (BY SUBJECT & DIFFICULTY)
+            // ========================================================================
+            renderMockTests(container) {
+                const subjects = Object.keys(QUESTION_BANK);
+                const levels = [
+                    { name: "Beginner", badge: "bg-emerald-500/20 text-emerald-300", desc: "Core syntax, definitions & fundamental concepts." },
+                    { name: "Intermediate", badge: "bg-blue-500/20 text-blue-300", desc: "Application-level problem solving & standard university patterns." },
+                    { name: "Advanced", badge: "bg-purple-500/20 text-purple-300", desc: "Deep internals, optimization, edge cases & NIAT placement rigor." }
+                ];
+
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 mb-6">
+                        <h3 class="text-lg font-bold text-white">Structured Mock Test Series</h3>
+                        <p class="text-xs text-slate-400 mt-1">Select any subject and difficulty tier (Beginner, Intermediate, Advanced) or launch a full 15-question cumulative mock.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${subjects.map(subj => `
+                            <div class="glass-card rounded-2xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h4 class="text-base font-bold text-white">${subj}</h4>
+                                        <p class="text-xs text-slate-400">${QUESTION_BANK[subj].length} Questions Available</p>
+                                    </div>
+                                    <button onclick="App.launchSubjectExam('${subj}', 'All', '${subj} Full Mock Test (15 Qs)')"
+                                        class="px-3.5 py-2 rounded-xl gradient-btn text-white text-xs font-bold">
+                                        Full 15-Q Mock
+                                    </button>
+                                </div>
+                                <div class="space-y-2.5">
+                                    ${levels.map(lvl => `
+                                        <div class="p-3 rounded-xl bg-navy-900/75 border border-indigo-500/15 flex items-center justify-between gap-3">
+                                            <div>
+                                                <span class="px-2 py-0.5 rounded text-[11px] font-bold ${lvl.badge}">${lvl.name}</span>
+                                                <p class="text-[11px] text-slate-400 mt-1">${lvl.desc}</p>
+                                            </div>
+                                            <button onclick="App.launchSubjectExam('${subj}', '${lvl.name}', '${subj} (${lvl.name} Mock)')"
+                                                class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 border border-indigo-500/30 text-indigo-200 text-xs font-semibold shrink-0">
+                                                Start →
+                                            </button>
+                                        </div>
+                                    `).join("")}
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                `;
+            },
+
+            // ========================================================================
+            // MODULE 7: QUIZ CENTER (15 RANDOMIZED QUESTIONS + PRACTICE FEEDBACK)
+            // ========================================================================
+            renderQuizCenter(container) {
+                const qz = this.quizRuntime;
+
+                if (!qz.active && !qz.finished) {
+                    const subjects = ["Mixed (All Subjects)", ...Object.keys(QUESTION_BANK)];
+                    container.innerHTML = `
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                                <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                    <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                                    <span>Interactive Quiz Center</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mb-6">15 randomized questions per session with countdown timer, instant practice feedback, detailed explanations, and persistent quiz history.</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-xs">
+                                    <div>
+                                        <label class="block text-slate-300 font-semibold mb-1.5">Quiz Topic / Subject</label>
+                                        <select id="quiz-subject-select" class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                            ${subjects.map(s => `<option value="${s}">${s}</option>`).join("")}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-300 font-semibold mb-1.5">Feedback Mode</label>
+                                        <select id="quiz-mode-select" class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                            <option value="practice">Practice Mode (Instant Answer & Explanation)</option>
+                                            <option value="timed">Challenge Mode (Score & Solutions at End)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button onclick="App.startQuiz()" class="px-6 py-3 rounded-xl gradient-btn text-white text-xs font-bold flex items-center gap-2">
+                                    <i data-lucide="play" class="w-4 h-4"></i>
+                                    <span>Generate 15-Question Quiz</span>
+                                </button>
+                            </div>
+
+                            <!-- Quiz History -->
+                            <div class="glass-card rounded-2xl p-6">
+                                <h4 class="font-bold text-white text-sm mb-3">Recent Quiz History</h4>
+                                <div class="space-y-2.5 max-h-72 overflow-y-auto">
+                                    ${this.state.quizHistory.slice().reverse().map(h => `
+                                        <div class="p-3 rounded-xl bg-navy-900/80 border border-indigo-500/20 text-xs">
+                                            <div class="flex justify-between font-bold text-white">
+                                                <span>${h.subject}</span>
+                                                <span class="text-emerald-400">${h.score}/${h.total} (${h.percentage}%)</span>
+                                            </div>
+                                            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                                                <span>${h.mode}</span>
+                                                <span>${h.date}</span>
+                                            </div>
+                                        </div>
+                                    `).join("")}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Finished Quiz Review Screen
+                if (qz.finished) {
+                    let score = 0;
+                    qz.questions.forEach((q, i) => { if (qz.answers[i] === q.ans) score++; });
+                    const pct = Math.round((score / qz.questions.length) * 100);
+
+                    container.innerHTML = `
+                        <div class="glass-card rounded-2xl p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-bold text-purple-300 uppercase">Quiz Completed</span>
+                                <h3 class="text-2xl font-extrabold text-white">${qz.subject} — Final Score: ${score}/${qz.questions.length} (${pct}%)</h3>
+                            </div>
+                            <button onclick="App.resetQuizState()" class="px-5 py-2.5 rounded-xl gradient-btn text-white text-xs font-bold">
+                                Start Another Quiz
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${qz.questions.map((q, i) => {
+                                const userAns = qz.answers[i];
+                                const isCorrect = userAns === q.ans;
+                                return `
+                                    <div class="glass-card rounded-2xl p-5 border-l-4 ${isCorrect ? 'border-l-emerald-500' : 'border-l-rose-500'}">
+                                        <div class="flex items-center justify-between text-xs mb-2">
+                                            <span class="font-bold text-slate-300">Question ${i + 1}</span>
+                                            <span class="font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">
+                                                ${userAns === undefined ? 'Unanswered' : isCorrect ? 'Correct ✓' : 'Incorrect ✗'}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-white mb-3">${q.q}</p>
+                                        <div class="text-xs space-y-1 mb-3">
+                                            <p class="text-slate-300">Your Answer: <strong class="${isCorrect ? 'text-emerald-300' : 'text-rose-300'}">${userAns !== undefined ? q.opts[userAns] : 'None'}</strong></p>
+                                            <p class="text-emerald-300">Correct Answer: <strong>${q.opts[q.ans]}</strong></p>
+                                        </div>
+                                        <div class="p-3 rounded-xl bg-navy-900/90 text-xs text-indigo-200">
+                                            <strong>Explanation:</strong> ${q.exp}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Active Quiz Screen
+                const q = qz.questions[qz.currentIndex];
+                const chosen = qz.answers[qz.currentIndex];
+                const showInstant = qz.practiceMode && chosen !== undefined;
+
+                container.innerHTML = `
+                    <div class="max-w-3xl mx-auto glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-indigo-500/15">
+                            <div>
+                                <span class="text-xs text-purple-300 font-bold">${qz.subject} • ${qz.practiceMode ? 'Practice Mode' : 'Timed Challenge'}</span>
+                                <h3 class="text-base font-bold text-white">Question ${qz.currentIndex + 1} of ${qz.questions.length}</h3>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span id="quiz-timer-display" class="px-3 py-1.5 rounded-xl bg-navy-900 font-mono text-xs font-bold text-cyan-300 border border-indigo-500/30">
+                                    ${UI.formatTime(qz.timeLeft)}
+                                </span>
+                                <button onclick="App.finishQuiz()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">
+                                    Finish Quiz
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-base font-semibold text-white mb-5">${q.q}</p>
+
+                        <div class="space-y-3 mb-5">
+                            ${q.opts.map((opt, idx) => {
+                                let cls = "bg-navy-900/80 border-indigo-500/20 text-slate-200 hover:bg-navy-800";
+                                if (showInstant) {
+                                    if (idx === q.ans) cls = "bg-emerald-600/30 border-emerald-400 text-white";
+                                    else if (idx === chosen) cls = "bg-rose-600/30 border-rose-400 text-white";
+                                } else if (chosen === idx) {
+                                    cls = "bg-purple-600/30 border-purple-400 text-white";
+                                }
+                                return `
+                                    <button onclick="App.answerQuizOption(${idx})"
+                                        class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center gap-3 ${cls}">
+                                        <span class="w-6 h-6 rounded-md bg-navy-800 flex items-center justify-center text-xs font-bold">${String.fromCharCode(65 + idx)}</span>
+                                        <span>${opt}</span>
+                                    </button>
+                                `;
+                            }).join("")}
+                        </div>
+
+                        ${showInstant ? `
+                            <div class="p-4 rounded-xl bg-indigo-950/80 border border-indigo-400/30 text-xs text-indigo-200 mb-5 animate-fade-in">
+                                <p class="font-bold text-white mb-1">${chosen === q.ans ? '🎉 Spot on!' : '💡 Review Concept:'}</p>
+                                <p>${q.exp}</p>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex justify-between pt-4 border-t border-indigo-500/15">
+                            <button onclick="App.navQuiz(-1)" ${qz.currentIndex === 0 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-navy-800 disabled:opacity-40 text-xs font-semibold text-white">
+                                ← Previous
+                            </button>
+                            ${qz.currentIndex < qz.questions.length - 1
+                                ? `<button onclick="App.navQuiz(1)" class="px-5 py-2 rounded-xl gradient-btn text-xs font-bold text-white">Next Question →</button>`
+                                : `<button onclick="App.finishQuiz()" class="px-5 py-2 rounded-xl bg-emerald-600 text-xs font-bold text-white">Submit & View Scorecard</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            },
+
+            startQuiz() {
+                const subj = document.getElementById("quiz-subject-select").value;
+                const practiceMode = document.getElementById("quiz-mode-select").value === "practice";
+                let pool = subj === "Mixed (All Subjects)"
+                    ? Object.values(QUESTION_BANK).flat()
+                    : [...(QUESTION_BANK[subj] || QUESTION_BANK["Python"])];
+
+                // Fisher-Yates Shuffle & slice 15
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                const selected15 = pool.slice(0, 15);
+
+                if (this.quizRuntime.timerId) clearInterval(this.quizRuntime.timerId);
+                this.quizRuntime = {
+                    active: true,
+                    subject: subj,
+                    practiceMode,
+                    questions: selected15,
+                    currentIndex: 0,
+                    answers: {},
+                    timeLeft: 600,
+                    finished: false,
+                    timerId: setInterval(() => {
+                        if (!this.quizRuntime.active) return;
+                        this.quizRuntime.timeLeft--;
+                        const el = document.getElementById("quiz-timer-display");
+                        if (el) el.textContent = UI.formatTime(this.quizRuntime.timeLeft);
+                        if (this.quizRuntime.timeLeft <= 0) this.finishQuiz();
+                    }, 1000)
+                };
+                this.renderQuizCenter(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            answerQuizOption(idx) {
+                const qz = this.quizRuntime;
+                if (qz.practiceMode && qz.answers[qz.currentIndex] !== undefined) return; // lock in practice mode after feedback
+                qz.answers[qz.currentIndex] = idx;
+                this.renderQuizCenter(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            navQuiz(delta) {
+                const next = this.quizRuntime.currentIndex + delta;
+                if (next >= 0 && next < this.quizRuntime.questions.length) {
+                    this.quizRuntime.currentIndex = next;
+                    this.renderQuizCenter(document.getElementById("app-content"));
+                    lucide.createIcons();
+                }
+            },
+
+            finishQuiz() {
+                const qz = this.quizRuntime;
+                if (qz.timerId) clearInterval(qz.timerId);
+                qz.active = false;
+                qz.finished = true;
+
+                let score = 0;
+                qz.questions.forEach((q, i) => { if (qz.answers[i] === q.ans) score++; });
+                const pct = Math.round((score / qz.questions.length) * 100);
+
+                this.state.quizHistory.push({
+                    id: "QZ-" + Date.now().toString().slice(-4),
+                    subject: qz.subject,
+                    mode: qz.practiceMode ? "Practice Mode" : "Timed Challenge",
+                    date: new Date().toISOString().slice(0, 10),
+                    score,
+                    total: qz.questions.length,
+                    percentage: pct
+                });
+                StorageManager.save(this.state);
+                this.renderQuizCenter(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            resetQuizState() {
+                this.quizRuntime.active = false;
+                this.quizRuntime.finished = false;
+                this.renderQuizCenter(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            // ========================================================================
+            // MODULE 8: ASSIGNMENTS (ADD, FILE UPLOAD METADATA, TEXT SUBMIT, TRACK)
+            // ========================================================================
+            renderAssignments(container) {
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Add New Assignment Form -->
+                        <div class="glass-card rounded-2xl p-6 h-fit">
+                            <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i>
+                                <span>Add Coursework / Task</span>
+                            </h3>
+                            <p class="text-xs text-slate-400 mb-4">Create custom B.Tech or NIAT assignment trackers.</p>
+                            <form onsubmit="App.addAssignment(event)" class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1">Assignment Title</label>
+                                    <input type="text" name="title" required placeholder="e.g., Implement Binary Search Tree in C"
+                                        class="w-full px-3 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1">Subject</label>
+                                    <input type="text" name="subject" required placeholder="e.g., Data Structures"
+                                        class="w-full px-3 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1">Deadline Date</label>
+                                    <input type="date" name="deadline" required value="2026-12-10"
+                                        class="w-full px-3 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1">Instructions / Description</label>
+                                    <textarea name="description" rows="3" required placeholder="Brief requirements..."
+                                        class="w-full px-3 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white"></textarea>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 rounded-xl gradient-btn text-white font-bold">
+                                    + Add Assignment
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Assignment List & Submission Portal -->
+                        <div class="lg:col-span-2 space-y-4">
+                            ${this.state.assignments.map(asg => {
+                                const isSubmitted = asg.status === "Submitted";
+                                return `
+                                    <div class="glass-card rounded-2xl p-6">
+                                        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                                            <div>
+                                                <span class="text-xs font-semibold text-indigo-300">${asg.subject} • Due: ${asg.deadline}</span>
+                                                <h4 class="text-base font-bold text-white mt-0.5">${asg.title}</h4>
+                                            </div>
+                                            <span class="px-3 py-1 rounded-full text-xs font-bold ${isSubmitted ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
+                                                ${asg.status}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-300 leading-relaxed mb-4">${asg.description}</p>
+
+                                        ${isSubmitted ? `
+                                            <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/25 text-xs space-y-1.5">
+                                                <p class="font-bold text-emerald-300">✓ Demo Submission Recorded (${asg.submittedAt})</p>
+                                                ${asg.attachedFileName ? `<p class="text-slate-300">Attached File: <span class="font-mono text-purple-300">${asg.attachedFileName}</span></p>` : ''}
+                                                <p class="text-slate-300">Notes: ${asg.submittedText}</p>
+                                            </div>
+                                        ` : `
+                                            <form onsubmit="App.submitAssignment(event, '${asg.id}')" class="p-4 rounded-xl bg-navy-900/80 border border-indigo-500/20 space-y-3 text-xs">
+                                                <div>
+                                                    <label class="block text-slate-300 font-semibold mb-1">Text Solution / Code Summary</label>
+                                                    <textarea name="submittedText" rows="2" required placeholder="Enter your solution notes or GitHub/Colab link..."
+                                                        class="w-full px-3 py-2 rounded-xl bg-navy-800 border border-indigo-500/30 text-white"></textarea>
+                                                </div>
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div>
+                                                        <label class="block text-slate-400 mb-1">Attach File (PDF, DOCX, PNG/JPG)</label>
+                                                        <input type="file" name="fileUpload" accept=".pdf,.doc,.docx,image/*"
+                                                            class="text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-600/30 file:text-purple-200 hover:file:bg-purple-600/40">
+                                                    </div>
+                                                    <button type="submit" class="px-5 py-2.5 rounded-xl gradient-btn text-white font-bold shrink-0">
+                                                        Submit Work
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        `}
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    </div>
+                `;
+            },
+
+            addAssignment(e) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                this.state.assignments.unshift({
+                    id: "ASG-" + Date.now().toString().slice(-4),
+                    title: fd.get("title"),
+                    subject: fd.get("subject"),
+                    deadline: fd.get("deadline"),
+                    description: fd.get("description"),
+                    status: "Pending",
+                    submittedText: "",
+                    attachedFileName: "",
+                    submittedAt: ""
+                });
+                StorageManager.save(this.state);
+                UI.toast("New assignment added!", "success");
+                this.renderAssignments(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            submitAssignment(e, id) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const file = fd.get("fileUpload");
+                const fileName = file && file.name ? file.name : "";
+                const asg = this.state.assignments.find(a => a.id === id);
+                if (asg) {
+                    asg.status = "Submitted";
+                    asg.submittedText = fd.get("submittedText");
+                    asg.attachedFileName = fileName;
+                    asg.submittedAt = new Date().toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    StorageManager.save(this.state);
+                    UI.toast("Assignment submitted and stored locally!", "success");
+                    this.renderAssignments(document.getElementById("app-content"));
+                    lucide.createIcons();
+                }
+            },
+
+            // ========================================================================
+            // MODULE 9: CODING PRACTICE (HONEST FRONTEND SANDBOX)
+            // ========================================================================
+            renderCodingPractice(container) {
+                const cr = this.codingRuntime;
+                const challenge = CODING_CHALLENGES.find(c => c.id === cr.challengeId) || CODING_CHALLENGES[0];
+                const languages = ["Python", "C", "C++", "Java", "JavaScript"];
+                const codeKey = `${challenge.id}_${cr.language}`;
+                const currentCode = cr.userCode[codeKey] !== undefined ? cr.userCode[codeKey] : challenge.starterCode[cr.language];
+
+                container.innerHTML = `
+                    <!-- Honest Execution Engine Disclosure Banner -->
+                    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 mb-6 flex items-start gap-3">
+                        <i data-lucide="terminal-square" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong class="text-amber-300">Frontend Code Editor Notice:</strong> Actual multi-language compilation and execution (Python, C, C++, Java) require a secure backend sandbox container (e.g., Docker/Judge0). This frontend version provides syntax drafting, starter templates, and test-case inspection without simulating fake server execution.
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Left 5 Cols: Problem Statement & Test Cases -->
+                        <div class="lg:col-span-5 glass-card rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1.5">Select Algorithm Challenge</label>
+                                <select onchange="App.selectCodingChallenge(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white text-xs font-semibold mb-5">
+                                    ${CODING_CHALLENGES.map(c => `<option value="${c.id}" ${c.id === challenge.id ? 'selected' : ''}>${c.title} (${c.difficulty})</option>`).join("")}
+                                </select>
+
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">${challenge.difficulty}</span>
+                                    <span class="text-xs text-indigo-300">${challenge.topic}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white mb-3">${challenge.title}</h3>
+                                <p class="text-xs text-slate-300 leading-relaxed mb-5">${challenge.description}</p>
+
+                                <div class="space-y-3 text-xs">
+                                    <div class="p-3 rounded-xl bg-navy-900/90 border border-indigo-500/20">
+                                        <p class="text-slate-400 font-semibold mb-1">Sample Input:</p>
+                                        <code class="font-mono text-cyan-300">${challenge.sampleInput}</code>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-navy-900/90 border border-indigo-500/20">
+                                        <p class="text-slate-400 font-semibold mb-1">Expected Output:</p>
+                                        <code class="font-mono text-emerald-300">${challenge.expectedOutput}</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 pt-4 border-t border-indigo-500/15">
+                                <h4 class="text-xs font-bold text-white mb-2">Verification Test Cases</h4>
+                                <div class="space-y-1.5">
+                                    ${challenge.testCases.map((tc, i) => `
+                                        <div class="p-2.5 rounded-lg bg-navy-900/60 text-[11px] font-mono flex justify-between text-slate-300">
+                                            <span>Case ${i + 1}: ${tc.input}</span>
+                                            <span class="text-emerald-400">→ ${tc.output}</span>
+                                        </div>
+                                    `).join("")}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right 7 Cols: Code Editor -->
+                        <div class="lg:col-span-7 glass-card rounded-2xl p-6 flex flex-col">
+                            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-indigo-500/15">
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${languages.map(lang => `
+                                        <button onclick="App.selectCodingLang('${lang}')"
+                                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                                                cr.language === lang ? 'bg-purple-600 text-white' : 'bg-navy-900 text-slate-400 hover:text-white'
+                                            }">
+                                            ${lang}
+                                        </button>
+                                    `).join("")}
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="App.resetStarterCode()" class="px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold">
+                                        Reset Template
+                                    </button>
+                                    <button onclick="App.copyEditorCode()" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
+                                        Copy Code
+                                    </button>
+                                </div>
+                            </div>
+
+                            <textarea id="code-editor-area" oninput="App.updateUserCode(this.value)" spellcheck="false"
+                                class="w-full flex-1 min-h-[340px] p-4 rounded-xl bg-navy-950 border border-indigo-500/25 font-mono text-xs sm:text-sm text-emerald-300 leading-relaxed focus:outline-none focus:border-purple-500">${currentCode}</textarea>
+
+                            <div class="mt-4 p-3.5 rounded-xl bg-navy-900/90 border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                <span class="text-slate-400">
+                                    <strong class="text-slate-200">Sandbox Status:</strong> Client-side editor ready. Connect a backend Judge0/Docker runner for live execution.
+                                </span>
+                                <button onclick="App.showSandboxNotice()" class="px-4 py-2 rounded-xl bg-slate-700/70 hover:bg-slate-700 text-slate-200 font-semibold shrink-0">
+                                    Execution Info
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            selectCodingChallenge(id) {
+                this.codingRuntime.challengeId = id;
+                this.renderCodingPractice(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            selectCodingLang(lang) {
+                this.codingRuntime.language = lang;
+                this.renderCodingPractice(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            updateUserCode(val) {
+                const key = `${this.codingRuntime.challengeId}_${this.codingRuntime.language}`;
+                this.codingRuntime.userCode[key] = val;
+            },
+
+            resetStarterCode() {
+                const key = `${this.codingRuntime.challengeId}_${this.codingRuntime.language}`;
+                delete this.codingRuntime.userCode[key];
+                this.renderCodingPractice(document.getElementById("app-content"));
+                lucide.createIcons();
+                UI.toast("Starter template restored.", "info");
+            },
+
+            copyEditorCode() {
+                const area = document.getElementById("code-editor-area");
+                if (area) {
+                    area.select();
+                    document.execCommand("copy");
+                    UI.toast("Code copied to clipboard!", "success");
+                }
+            },
+
+            showSandboxNotice() {
+                UI.showModal({
+                    title: `<i data-lucide="server" class="w-5 h-5 text-cyan-400"></i> Backend Execution Engine Required`,
+                    bodyHtml: "In this pure frontend version of NRI ExamVerse, code is never falsely executed or mocked with fake pass/fail badges. To run Python, C, C++, Java, or JS safely, integrate a containerized execution worker (e.g., Judge0 API or isolated Docker sandboxes) in the full-stack release.",
+                    actions: [{ label: "Understood", className: "px-4 py-2 rounded-xl text-xs font-semibold gradient-btn text-white" }]
+                });
+            },
+
+            // ========================================================================
+            // MODULE 10: PREVIOUS PAPERS
+            // ========================================================================
+            renderPreviousPapers(container) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 mb-6">
+                        <h3 class="text-lg font-bold text-white">Previous University & NIAT Question Papers</h3>
+                        <p class="text-xs text-slate-400 mt-1">Practice directly inside the CBT engine using past examination blueprints.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        ${PREVIOUS_PAPERS.map(pp => `
+                            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[11px] font-bold">${pp.type}</span>
+                                        <span class="text-xs font-mono text-slate-400">Year: ${pp.year}</span>
+                                    </div>
+                                    <h4 class="text-base font-bold text-white mb-2">${pp.title}</h4>
+                                    <p class="text-xs text-slate-400 mb-4">Subject: <strong class="text-indigo-300">${pp.subject}</strong> • Pattern: Objective CBT Practice</p>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-indigo-500/15">
+                                    <button onclick="App.previewPaper('${pp.id}')" class="text-xs text-slate-300 hover:text-white font-semibold">
+                                        View Paper Blueprint
+                                    </button>
+                                    <button onclick="App.launchSubjectExam('${pp.subject}', 'All', '${pp.title}')"
+                                        class="px-4 py-2 rounded-xl gradient-btn text-white text-xs font-bold">
+                                        Attempt Paper →
+                                    </button>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                `;
+            },
+
+            previewPaper(id) {
+                const pp = PREVIOUS_PAPERS.find(p => p.id === id);
+                const sampleQs = (QUESTION_BANK[pp.subject] || QUESTION_BANK["Python"]).slice(0, 3);
+                UI.showModal({
+                    title: `<i data-lucide="file-text" class="w-5 h-5 text-purple-400"></i> ${pp.title}`,
+                    bodyHtml: `
+                        <p class="text-xs text-slate-400 mb-3">Sample questions from this paper archive:</p>
+                        <div class="space-y-2.5 text-xs">
+                            ${sampleQs.map((q, i) => `
+                                <div class="p-3 rounded-xl bg-navy-900 border border-indigo-500/20">
+                                    <p class="font-semibold text-white">Q${i + 1}. ${q.q}</p>
+                                    <p class="text-emerald-400 mt-1">Ans: ${q.opts[q.ans]}</p>
+                                </div>
+                            `).join("")}
+                        </div>
+                    `,
+                    actions: [
+                        { label: "Close", className: "px-4 py-2 rounded-xl text-xs font-semibold bg-navy-700 text-white" },
+                        { label: "Start Full CBT Attempt", className: "px-4 py-2 rounded-xl text-xs font-semibold gradient-btn text-white", onClick: () => App.launchSubjectExam(pp.subject, "All", pp.title) }
+                    ]
+                });
+            },
+
+            // ========================================================================
+            // MODULE 11: STUDY MATERIALS (WITH LOCALSTORAGE BOOKMARKS)
+            // ========================================================================
+            renderStudyMaterials(container) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Curated Study Materials & Revision Sheets</h3>
+                            <p class="text-xs text-slate-400 mt-1">Bookmark key notes for instant access. Bookmarks persist in LocalStorage.</p>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
+                            ★ ${this.state.bookmarks.length} Bookmarked Materials
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        ${STUDY_MATERIALS.map(m => {
+                            const isBookmarked = this.state.bookmarks.includes(m.id);
+                            return `
+                                <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span class="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[11px] font-semibold">${m.category}</span>
+                                            <button onclick="App.toggleBookmark('${m.id}')" class="p-1.5 rounded-lg hover:bg-white/10 transition ${isBookmarked ? 'text-amber-400' : 'text-slate-400'}" title="Toggle Bookmark">
+                                                <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'fill-amber-400' : ''}"></i>
+                                            </button>
+                                        </div>
+                                        <h4 class="text-base font-bold text-white mb-1.5">${m.title}</h4>
+                                        <p class="text-xs text-indigo-300 mb-2">${m.subject} • ${m.pages} Pages</p>
+                                        <p class="text-xs text-slate-400 leading-relaxed mb-4">${m.summary}</p>
+                                    </div>
+                                    <button onclick="App.openMaterialReader('${m.id}')" class="w-full py-2.5 rounded-xl bg-navy-800 hover:bg-navy-700 border border-indigo-500/30 text-xs font-semibold text-white transition">
+                                        Read Summary Notes
+                                    </button>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                `;
+            },
+
+            toggleBookmark(id) {
+                const idx = this.state.bookmarks.indexOf(id);
+                if (idx >= 0) {
+                    this.state.bookmarks.splice(idx, 1);
+                    UI.toast("Removed from bookmarks.", "info");
+                } else {
+                    this.state.bookmarks.push(id);
+                    UI.toast("Bookmarked study material!", "success");
+                }
+                StorageManager.save(this.state);
+                this.renderStudyMaterials(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            openMaterialReader(id) {
+                const m = STUDY_MATERIALS.find(item => item.id === id);
+                UI.showModal({
+                    title: `<i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i> ${m.title}`,
+                    bodyHtml: `
+                        <div class="space-y-3 text-xs">
+                            <p class="text-indigo-300 font-semibold">${m.subject} • ${m.category} (${m.pages} Pages)</p>
+                            <p class="text-slate-300 leading-relaxed">${m.summary}</p>
+                            <div class="p-3.5 rounded-xl bg-navy-900 border border-indigo-500/20 text-slate-300">
+                                <strong>Key Exam Takeaways:</strong>
+                                <ul class="list-disc list-inside mt-1.5 space-y-1">
+                                    <li>Focus on time/space complexity trade-offs and edge-case behavior.</li>
+                                    <li>Review solved university derivations and practice 15-question CBT sets.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `,
+                    actions: [{ label: "Close Reader", className: "px-4 py-2 rounded-xl text-xs font-semibold gradient-btn text-white" }]
+                });
+            },
+
+            // ========================================================================
+            // MODULE 12: RESULTS & ANALYTICS
+            // ========================================================================
+            renderResults(container) {
+                const attempts = this.state.examAttempts;
+                const latest = attempts[attempts.length - 1];
+
+                // Compute Subject-wise averages
+                const subjectMap = {};
+                attempts.forEach(a => {
+                    if (!subjectMap[a.subject]) subjectMap[a.subject] = { totalPct: 0, count: 0 };
+                    subjectMap[a.subject].totalPct += a.percentage;
+                    subjectMap[a.subject].count++;
+                });
+
+                container.innerHTML = `
+                    <!-- Latest Exam Detailed Scorecard -->
+                    ${latest ? `
+                        <div class="glass-card rounded-2xl p-6 mb-6 border border-purple-500/30">
+                            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-indigo-500/15">
+                                <div>
+                                    <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">Latest Scorecard</span>
+                                    <h3 class="text-xl font-extrabold text-white mt-1">${latest.title}</h3>
+                                    <p class="text-xs text-slate-400">Attempt ID: ${latest.id} • Completed on ${latest.date}</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-extrabold gradient-text">${latest.percentage}%</div>
+                                    <div class="text-xs text-slate-300">Marks: <strong>${latest.score} / ${latest.total}</strong></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                                <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/25">
+                                    <span class="text-slate-400">Correct Answers</span>
+                                    <div class="text-xl font-extrabold text-emerald-400 mt-1">${latest.correct}</div>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-rose-950/30 border border-rose-500/25">
+                                    <span class="text-slate-400">Incorrect Answers</span>
+                                    <div class="text-xl font-extrabold text-rose-400 mt-1">${latest.incorrect}</div>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/25">
+                                    <span class="text-slate-400">Unanswered</span>
+                                    <div class="text-xl font-extrabold text-amber-400 mt-1">${latest.unanswered}</div>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-navy-900 border border-indigo-500/25">
+                                    <span class="text-slate-400">Time Taken</span>
+                                    <div class="text-xl font-extrabold text-cyan-300 mt-1">${UI.formatTime(latest.timeTakenSec)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Subject-Wise Performance -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <h4 class="font-bold text-white text-sm mb-4">Subject-Wise Mastery</h4>
+                            <div class="space-y-4">
+                                ${Object.entries(subjectMap).map(([subj, data]) => {
+                                    const avg = Math.round(data.totalPct / data.count);
+                                    return `
+                                        <div>
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="font-semibold text-white">${subj}</span>
+                                                <span class="text-indigo-300 font-bold">${avg}% (${data.count} attempts)</span>
+                                            </div>
+                                            <div class="w-full h-2 rounded-full bg-navy-900 overflow-hidden">
+                                                <div class="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" style="width: ${avg}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+
+                        <!-- Complete Examination History -->
+                        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                            <h4 class="font-bold text-white text-sm mb-4">Complete Examination History</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-indigo-500/20 text-slate-400">
+                                            <th class="pb-2.5">Exam Title</th>
+                                            <th class="pb-2.5">Subject</th>
+                                            <th class="pb-2.5">Marks</th>
+                                            <th class="pb-2.5">Accuracy</th>
+                                            <th class="pb-2.5">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-indigo-500/10">
+                                        ${attempts.slice().reverse().map(a => `
+                                            <tr>
+                                                <td class="py-3 font-medium text-white">${a.title}</td>
+                                                <td class="py-3 text-indigo-300">${a.subject}</td>
+                                                <td class="py-3 font-mono">${a.score}/${a.total}</td>
+                                                <td class="py-3 font-bold ${a.percentage >= 70 ? 'text-emerald-400' : 'text-amber-400'}">${a.percentage}%</td>
+                                                <td class="py-3 font-mono text-slate-400">${UI.formatTime(a.timeTakenSec)}</td>
+                                            </tr>
+                                        `).join("")}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ========================================================================
+            // MODULE 13: JARVIS AI ASSISTANT (ACADEMIC KNOWLEDGE ENGINE)
+            // ========================================================================
+            renderJarvis(container) {
+                const prompts = [
+                    "Explain Cayley-Hamilton Theorem",
+                    "Difference between List and Tuple in Python",
+                    "How to prepare for NIAT AI & ML modules?",
+                    "Give me a 1st year B.Tech exam revision plan"
+                ];
+
+                container.innerHTML = `
+                    <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 flex flex-col h-[600px]">
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-indigo-500/15">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl gradient-btn flex items-center justify-center text-white shadow-lg">
+                                    <i data-lucide="bot" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white text-base">JARVIS — NRIU × NIAT Academic AI</h3>
+                                    <p class="text-[11px] text-emerald-400">● Online • Rule-Based Academic Assistant (Frontend Demo)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div id="jarvis-chat-box" class="flex-1 overflow-y-auto space-y-3 pr-2 mb-4">
+                            ${this.jarvisMessages.map(m => `
+                                <div class="flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}">
+                                    <div class="max-w-[80%] p-3.5 rounded-2xl text-xs leading-relaxed ${
+                                        m.sender === 'user'
+                                        ? 'bg-purple-600 text-white rounded-br-none'
+                                        : 'bg-navy-900 border border-indigo-500/25 text-slate-200 rounded-bl-none'
+                                    }">
+                                        ${m.text}
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+
+                        <!-- Quick Prompt Chips -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            ${prompts.map(pr => `
+                                <button onclick="App.askJarvis('${pr}')" class="px-3 py-1.5 rounded-full bg-navy-800 hover:bg-navy-700 border border-indigo-500/25 text-[11px] text-indigo-300 transition">
+                                    ${pr}
+                                </button>
+                            `).join("")}
+                        </div>
+
+                        <!-- Input Form -->
+                        <form onsubmit="App.handleJarvisSubmit(event)" class="flex gap-2">
+                            <input id="jarvis-input" type="text" required placeholder="Ask JARVIS about Python, C, Engineering Math, or Exams..."
+                                class="flex-1 px-4 py-3 rounded-xl bg-navy-900 border border-indigo-500/30 text-xs text-white focus:outline-none focus:border-purple-500">
+                            <button type="submit" class="px-5 py-3 rounded-xl gradient-btn text-white text-xs font-bold">
+                                Send
+                            </button>
+                        </form>
+                    </div>
+                `;
+                const box = document.getElementById("jarvis-chat-box");
+                if (box) box.scrollTop = box.scrollHeight;
+            },
+
+            handleJarvisSubmit(e) {
+                e.preventDefault();
+                const input = document.getElementById("jarvis-input");
+                const q = input.value.trim();
+                if (!q) return;
+                input.value = "";
+                this.askJarvis(q);
+            },
+
+            askJarvis(query) {
+                this.jarvisMessages.push({ sender: "user", text: query });
+                const lower = query.toLowerCase();
+                let reply = "That's a great academic question! For your 1st Year B.Tech CSE (AI & ML) curriculum at NRI University, I recommend reviewing the unit notes in Study Materials and taking a 15-question practice quiz in the Quiz Center to reinforce mastery.";
+
+                if (lower.includes("cayley") || lower.includes("matrix") || lower.includes("math")) {
+                    reply = "<strong>Cayley-Hamilton Theorem:</strong> Every square matrix satisfies its own characteristic equation |A - λI| = 0. In Engineering Mathematics-I, this is heavily used to compute A⁻¹ and higher powers like A³ or A⁴ without repeated matrix multiplication.";
+                } else if (lower.includes("list") || lower.includes("tuple") || lower.includes("python")) {
+                    reply = "<strong>Python Lists vs Tuples:</strong> Lists <code>[]</code> are mutable (dynamic size, supports append/remove) with slightly higher memory overhead. Tuples <code>()</code> are immutable, faster to iterate, and hashable (can be used as dictionary keys).";
+                } else if (lower.includes("niat") || lower.includes("ai")) {
+                    reply = "<strong>NIAT AI & ML Roadmap:</strong> Focus first on Python + NumPy/Pandas, followed by SQL for data extraction, and then Supervised Learning & Generative AI (RAG & Prompt Engineering). You can track all 10 NIAT skill categories in the NIAT Learning module.";
+                } else if (lower.includes("plan") || lower.includes("revision") || lower.includes("exam")) {
+                    reply = "<strong>NRI ExamVerse 3-Step Revision Plan:</strong><br>1. Review Verified Official Syllabus units in <em>B.Tech Subjects</em>.<br>2. Complete Beginner → Intermediate → Advanced sets in <em>Mock Tests</em>.<br>3. Take a timed 15-question <em>Online Examination</em> and analyze weak areas in <em>Results</em>.";
+                } else if (lower.includes("pointer") || lower.includes("c ")) {
+                    reply = "<strong>C Pointers Tip:</strong> Always initialize pointers to <code>NULL</code>, match format specifiers carefully, and pair every <code>malloc()</code> or <code>calloc()</code> with <code>free()</code> to avoid memory leaks.";
+                }
+
+                this.jarvisMessages.push({ sender: "jarvis", text: reply });
+                this.renderJarvis(document.getElementById("app-content"));
+                lucide.createIcons();
+            },
+
+            // ========================================================================
+            // MODULE 14: SETTINGS & LOCALSTORAGE MANAGEMENT
+            // ========================================================================
+            renderSettings(container) {
+                const s = this.state.settings;
+                container.innerHTML = `
+                    <div class="max-w-3xl mx-auto space-y-6">
+                        <div class="glass-card rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-white mb-1">Platform & Examination Settings</h3>
+                            <p class="text-xs text-slate-400 mb-5">Customize CBT timer duration and frontend preferences.</p>
+
+                            <form onsubmit="App.saveSettings(event)" class="space-y-4 text-xs">
+                                <div>
+                                    <label class="block text-slate-300 font-semibold mb-1.5">Default Online Examination Duration (Minutes)</label>
+                                    <select name="examDurationMins" class="w-full sm:w-64 px-3.5 py-2.5 rounded-xl bg-navy-900 border border-indigo-500/30 text-white">
+                                        <option value="10" ${s.examDurationMins == 10 ? 'selected' : ''}>10 Minutes (Quick CBT)</option>
+                                        <option value="15" ${s.examDurationMins == 15 ? 'selected' : ''}>15 Minutes (Standard 15-Q)</option>
+                                        <option value="30" ${s.examDurationMins == 30 ? 'selected' : ''}>30 Minutes (Extended)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="px-5 py-2.5 rounded-xl gradient-btn text-white font-bold">
+                                    Save Settings
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- LocalStorage Architecture & Reset Controls -->
+                        <div class="glass-card rounded-2xl p-6 border border-amber-500/25">
+                            <h4 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                                <i data-lucide="database" class="w-4 h-4 text-amber-400"></i>
+                                <span>LocalStorage Data & Security Architecture</span>
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                                <strong>Important Technical Note:</strong> NRI ExamVerse uses browser <code>localStorage</code> to persist student profile edits, examination attempts, quiz history, assignments, and bookmarks locally without a server. Because browser storage is user-editable and lacks cryptographic proctoring, this version is strictly a <strong>frontend educational prototype</strong> and is not intended for official university grading.
+                            </p>
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="App.resetAllDemoData()" class="px-4 py-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 border border-rose-500/40 text-rose-200 text-xs font-bold transition">
+                                    Reset Demo Data to Factory Defaults
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            saveSettings(e) {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                this.state.settings.examDurationMins = parseInt(fd.get("examDurationMins"), 10) || 15;
+                StorageManager.save(this.state);
+                UI.toast("Examination settings saved!", "success");
+            },
+
+            resetAllDemoData() {
+                UI.showModal({
+                    title: `<i data-lucide="rotate-ccw" class="w-5 h-5 text-rose-400"></i> Reset All LocalStorage Data?`,
+                    bodyHtml: "This will restore Kola Santhosh's default profile, sample exam scores, assignments, and bookmarks. Custom edits will be cleared.",
+                    actions: [
+                        { label: "Cancel", className: "px-4 py-2 rounded-xl text-xs font-semibold bg-navy-700 text-slate-200" },
+                        {
+                            label: "Yes, Reset Data",
+                            className: "px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white",
+                            onClick: () => {
+                                this.state = StorageManager.reset();
+                                this.renderSidebar();
+                                this.navigate("dashboard");
+                                UI.toast("LocalStorage reset to clean demo defaults.", "info");
+                            }
+                        }
+                    ]
+                });
+            }
+        };
+
+        // Initialize NRI ExamVerse when DOM is ready
+        window.addEventListener("DOMContentLoaded", () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>
